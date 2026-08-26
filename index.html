@@ -835,9 +835,11 @@ async function saveMember(e){
  const pub=window.__publicRegistration||null;
  const role=String(f.get('role')||pub?.targetRole||'').trim(),rootRole=role==='SUPER ADMIN'||role==='INDEPENDENT PROJECT MANAGER';
  let parentId=rootRole?null:(f.get('parentId')?Number(f.get('parentId')):null);
- if(pub){
-   const owner=aa.find(x=>Number(x.id)===Number(pub.ownerId));
-   if(!owner)return toast('REGISTRATION LINK OWNER NOT FOUND');
+ if(pub){const owner=aa.find(x=>
+  Number(x.id)===Number(pub.ownerId) ||
+  String(x.memberId||x.member_id||'').trim()===String(pub.ownerMemberId||'').trim()
+);
+if(!owner)return toast('REGISTRATION LINK OWNER NOT FOUND');
    if(role!==pub.targetRole)return toast('INVALID REGISTRATION ROLE');
    if(!rootRole)parentId=Number(owner.id);
  }else if(!isAdmin()){
