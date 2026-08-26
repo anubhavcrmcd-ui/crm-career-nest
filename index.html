@@ -632,7 +632,7 @@ async function openPublicRegistration(){
    roleSel.innerHTML=`<option value="${esc(target)}">${esc(ROLE_LABELS[target]||target)}</option>`;roleSel.value=target;roleSel.disabled=true;
    parentSel.innerHTML=target==='INDEPENDENT PROJECT MANAGER'?'<option value="">— NO PARENT —</option>':`<option value="${esc(window.__publicRegistration.ownerId)}">${esc(ownerLabel)} • ${esc(ROLE_LABELS[ownerRole]||ownerRole)}</option>`;parentSel.value=window.__publicRegistration.ownerId;parentSel.disabled=true;
    statusSel.value='PENDING';statusSel.disabled=true;
-   form.onsubmit=e=>{e.preventDefault();toast('ONLINE REGISTRATION FORM OPENED — SUBMISSION BACKEND NEXT');};
+   form.onsubmit=saveMember;
    return true;
   }catch(e){console.error(e);alert('INVALID REGISTRATION LINK');return false;}
 }
