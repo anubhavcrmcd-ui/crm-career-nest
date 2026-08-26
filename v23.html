@@ -1,0 +1,1024 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CAREER NEST CRM — STEP 2 Members</title>
+<style>
+:root{--nav:#0b2447;--nav2:#123b6d;--green:#4b8f2c;--ink:#172033;--muted:#667085;--bg:#f4f7fb;--card:#fff;--line:#e5e7eb;--danger:#c62828;--shadow:0 8px 28px rgba(16,24,40,.08)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+.login{min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,#071d39,#0d4b5d)}
+.login-card{width:min(440px,92vw);background:#fff;border-radius:22px;padding:30px;box-shadow:0 25px 80px #0005}
+.brand{text-align:center}.brand img{width:210px;max-height:110px;object-fit:contain}.brand h1{margin:8px 0 2px;font-size:22px;color:var(--nav)}
+.brand p{margin:0 0 22px;color:var(--muted);font-size:13px}
+.app{display:none;min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:250px;background:linear-gradient(180deg,var(--nav),#071a32);color:#fff;padding:18px 12px;overflow:auto;z-index:10}
+.side-brand{padding:6px 8px 18px;border-bottom:1px solid #ffffff20;margin-bottom:12px;text-align:center}
+.side-brand img{width:150px;background:#fff;border-radius:10px;padding:5px}.side-brand b{display:block;margin-top:8px;font-size:14px}
+.nav button{width:100%;border:0;background:transparent;color:#dbeafe;text-align:left;padding:11px 12px;border-radius:9px;margin:2px 0;font-weight:600}
+.nav button:hover,.nav button.active{background:#ffffff18;color:#fff}.main{margin-left:250px;padding:20px;min-height:100vh}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.topbar h2{margin:0;font-size:24px}
+.user-chip{background:#fff;border:1px solid var(--line);padding:8px 12px;border-radius:999px;font-size:13px}
+.grid{display:grid;gap:16px}.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.three{grid-template-columns:repeat(3,minmax(0,1fr))}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow)}
+.kpi small{color:var(--muted)}.kpi strong{display:block;font-size:27px;margin-top:8px}.section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.section-title h3{margin:0}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:9px;padding:9px 13px;background:var(--nav);color:#fff;font-weight:700}
+.btn.green{background:var(--green)}.btn.gold{background:#9b7212}.btn.red{background:var(--danger)}.btn.light{background:#eef2f7;color:var(--ink)}.btn.small{padding:6px 9px;font-size:12px}
+table{width:100%;border-collapse:collapse}th,td{padding:10px 9px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:top}
+th{background:#f8fafc;color:#475467}.table-wrap{overflow:auto}.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;background:#eef2ff}
+.badge.active{background:#e8f7ed;color:#1b6e37}.badge.pending{background:#fff7df;color:#8a6510}.badge.rejected,.badge.archived{background:#fdecec;color:#9f2525}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}
+label{font-size:12px;font-weight:800;color:#344054}input,select,textarea{width:100%;border:1px solid #d0d5dd;border-radius:9px;padding:10px 11px;background:#fff;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#4676a9;box-shadow:0 0 0 3px #4676a920}textarea{min-height:82px;resize:vertical}
+.hint,.settings-note{font-size:11px;color:var(--muted);line-height:1.6}.modal{position:fixed;inset:0;background:#0007;display:none;place-items:center;z-index:50;padding:18px}
+.modal.show{display:grid}.modal-box{width:min(1000px,96vw);max-height:94vh;overflow:auto;background:#fff;border-radius:18px;padding:20px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.modal-head h3{margin:0}.close{border:0;background:#f1f3f5;border-radius:50%;width:34px;height:34px;font-size:20px}
+.tree ul{list-style:none;padding-left:22px;border-left:1px dashed #b9c2cf;margin-left:8px}.tree li{margin:10px 0}
+.node{display:inline-flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);padding:8px 10px;border-radius:10px;box-shadow:var(--shadow)}
+.node b{font-size:13px}.node small{color:var(--muted)}.progress{height:10px;background:#edf1f5;border-radius:99px;overflow:hidden}.progress i{display:block;height:100%;background:var(--green)}
+.empty{padding:30px;text-align:center;color:var(--muted)}.toast{position:fixed;right:20px;bottom:20px;background:#111827;color:#fff;padding:12px 16px;border-radius:10px;display:none;z-index:100}
+.toast.show{display:block}/* ===== CAREER NEST ID CARD — CR80 / ID-1 VERTICAL ===== */
+.id-card{
+  width:53.98mm;
+  height:85.60mm;
+  min-width:53.98mm;
+  min-height:85.60mm;
+  box-sizing:border-box;
+  background:#fff;
+  color:#172033;
+  border:.45mm solid #0b2447;
+  border-radius:3.1mm;
+  overflow:hidden;
+  position:relative;
+  flex:0 0 53.98mm;
+  box-shadow:0 2px 8px rgba(16,24,40,.12);
+}
+.id-front,.id-back{
+  width:100%;
+  height:100%;
+  box-sizing:border-box;
+  padding:3.2mm 3.5mm;
+  position:relative;
+  overflow:hidden;
+}
+.id-front{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.id-front .logo,.id-back .logo{
+  width:29mm;
+  height:9mm;
+  object-fit:contain;
+  display:block;
+  flex:0 0 auto;
+  margin:0 auto .8mm;
+}
+.id-front .card-title{
+  font-size:2.65mm;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.22mm;
+  color:#0b2447;
+  margin:0 0 1.1mm;
+}
+.avatar{
+  width:22mm;
+  height:25mm;
+  object-fit:cover;
+  border-radius:1.2mm;
+  border:.4mm solid #cbd5e1;
+  background:#f8fafc;
+  display:block;
+  margin:0 auto 1.6mm;
+  flex:0 0 auto;
+}
+.id-photo-placeholder{
+  width:22mm;
+  height:25mm;
+  border:.4mm solid #cbd5e1;
+  border-radius:1.2mm;
+  background:#f8fafc;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto 1.6mm;
+  font-size:2mm;
+  font-weight:800;
+  color:#667085;
+  flex:0 0 auto;
+}
+.id-fields{
+  width:100%;
+  text-align:left;
+  font-size:2.05mm;
+  line-height:1.08;
+  flex:0 0 auto;
+}
+.id-fields .field{
+  display:grid;
+  grid-template-columns:17mm 1fr;
+  column-gap:1.2mm;
+  align-items:start;
+  min-height:4.05mm;
+  margin:0;
+  padding:.45mm 0;
+  border-bottom:.2mm solid #e5e7eb;
+}
+.id-fields .field:last-child{border-bottom:0}
+.id-fields b{
+  display:block;
+  color:#0b2447;
+  font-size:1.75mm;
+  line-height:1.1;
+  letter-spacing:.08mm;
+  margin:0;
+}
+.id-fields span{
+  display:block;
+  font-size:2.05mm;
+  line-height:1.08;
+  font-weight:750;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+.id-sign{
+  position:absolute;
+  left:3.5mm;
+  right:3.5mm;
+  bottom:2.8mm;
+  height:9.2mm;
+  box-sizing:border-box;
+  border-top:.25mm solid #98a2b3;
+  padding-top:.8mm;
+  text-align:center;
+  background:#fff;
+}
+.id-sign small{
+  display:block;
+  font-size:1.65mm;
+  line-height:1;
+  font-weight:900;
+  color:#475467;
+  letter-spacing:.1mm;
+}
+.id-sign img{
+  display:block;
+  height:5.8mm;
+  max-width:22mm;
+  object-fit:contain;
+  margin:.55mm auto 0;
+}
+.id-back{
+  text-align:left;
+}
+.id-back .logo{
+  margin:0 auto .7mm;
+}
+.back-heading{
+  font-size:2.45mm;
+  line-height:1;
+  font-weight:900;
+  color:#0b2447;
+  text-align:center;
+  margin:0 0 2.2mm;
+  letter-spacing:.18mm;
+}
+.back-label{
+  font-size:1.8mm;
+  line-height:1;
+  font-weight:900;
+  color:#0b2447;
+  margin:1.7mm 0 .45mm;
+}
+.back-value{
+  font-size:1.95mm;
+  line-height:1.15;
+  margin:0;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+.back-important{
+  font-size:1.85mm;
+  line-height:1;
+  font-weight:900;
+  color:#0b2447;
+  margin-top:2.4mm;
+}
+.back-list{
+  font-size:1.75mm;
+  line-height:1.27;
+  margin:.8mm 0 0;
+  padding-left:3.2mm;
+}
+.back-list li{margin:.45mm 0}
+.id-card-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:15px}
+.id-card-pair{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+.id-card-label{font-size:12px;color:#667085;text-align:center;margin:0 0 6px;font-weight:800}
+@media print{
+  @page{size:53.98mm 85.60mm;margin:0}
+  html,body{width:53.98mm!important;margin:0!important;padding:0!important;background:#fff!important}
+  body *{visibility:hidden!important}
+  .print-area,.print-area *{visibility:visible!important}
+  .print-area{
+    position:absolute!important;
+    left:0!important;
+    top:0!important;
+    width:53.98mm!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  .id-card-pair{
+    display:block!important;
+    width:53.98mm!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  .id-card-pair > div{display:block!important;width:53.98mm!important;margin:0!important;padding:0!important}
+  .id-card-label{display:none!important}
+  .id-card{
+    display:block!important;
+    width:53.98mm!important;
+    height:85.60mm!important;
+    min-width:53.98mm!important;
+    min-height:85.60mm!important;
+    margin:0!important;
+    border-radius:3.1mm!important;
+    box-shadow:none!important;
+    page-break-after:always!important;
+    break-after:page!important;
+  }
+  .id-card:last-child{page-break-after:auto!important;break-after:auto!important}
+}
+@media(max-width:900px){.sidebar{width:215px}.main{margin-left:215px}.kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.sidebar{position:relative;width:100%;height:auto}.main{margin-left:0}.form-grid,.two,.three,.kpis{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}}
+@media print{body *{visibility:hidden!important}.print-area,.print-area *{visibility:visible!important}.print-area{position:absolute;left:0;top:0;width:100%}}
+
+/* ===== V21 MODERN DASHBOARD ===== */
+.dashboard-page{display:flex;flex-direction:column;gap:14px}.dash-range{padding:16px 18px}.dash-range-grid{display:grid;grid-template-columns:1.2fr 1.2fr 1fr auto auto;gap:12px;align-items:end}.dash-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.dash-kpi{min-height:104px;display:flex;align-items:center;gap:13px;padding:16px}.dash-icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;color:#fff;font-size:22px;font-weight:900;flex:0 0 48px}.dash-icon.blue{background:#1677e8}.dash-icon.green{background:#12a150}.dash-icon.red{background:#ef3123}.dash-icon.purple{background:#7a3fe1}.dash-icon.orange{background:#f28705}.dash-kpi small{display:block;color:#475467;font-weight:800;font-size:11px;letter-spacing:.2px}.dash-kpi strong{display:block;font-size:22px;margin-top:7px;color:#172033}.dash-sub{font-size:10px;color:#667085;margin-top:3px}.dash-sub.green{color:#15803d;font-weight:800}.dash-section{padding:16px}.dash-table th{white-space:nowrap;font-size:11px}.dash-table td{font-size:12px}.dash-seller{display:flex;align-items:center;gap:8px;min-width:170px}.dash-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;background:#e9eef5;border:1px solid #d7dee8;display:grid;place-items:center;font-weight:900;color:#0b2447;overflow:hidden;flex:0 0 34px}.dash-avatar img{width:100%;height:100%;object-fit:cover}.dash-idmini{width:62px;height:38px;border:1px solid #d8dee8;border-radius:5px;background:#fff;padding:4px 5px;display:flex;flex-direction:column;justify-content:center;line-height:1.05}.dash-idmini b{font-size:8px;color:#0b2447}.dash-idmini span{font-size:7px;color:#667085;margin-top:3px}.dash-status{display:inline-flex;flex-direction:column;align-items:center;gap:2px}.dash-status .ok{background:#e8f7ed;color:#176b35;padding:4px 7px;border-radius:6px;font-size:10px;font-weight:900}.dash-status .pay{color:#e11d48;font-size:10px;font-weight:900}.dash-net{color:#16803c;font-weight:900;font-size:14px}.dash-bottom{display:grid;grid-template-columns:1.2fr 1fr .9fr;gap:14px}.dash-list{display:flex;flex-direction:column;gap:8px}.dash-list-row{display:grid;grid-template-columns:30px 1fr auto;gap:9px;align-items:center;padding:8px 5px;border-bottom:1px solid #eef1f5}.dash-rank{font-size:16px;text-align:center}.dash-payment-row{padding:10px 12px;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:13px}.dash-payment-row.purple{background:#f5edff;color:#6b21a8}.dash-payment-row.red{background:#fff0ef;color:#dc2626}.dash-payment-row.green{background:#edf9f0;color:#15803d}.dash-payment-row.blue{background:#eef5ff;color:#2563eb}.dash-actions{display:flex;flex-direction:column;gap:8px}.dash-actions .btn{width:100%;padding:10px 12px}.dash-total td{font-weight:900;background:#f8fafc}.dash-export{background:#198b37!important}.dash-range .field{gap:5px}@media(max-width:1100px){.dash-kpis{grid-template-columns:repeat(3,1fr)}.dash-bottom{grid-template-columns:1fr 1fr}.dash-actions-card{grid-column:1/-1}.dash-range-grid{grid-template-columns:1fr 1fr auto}}@media(max-width:700px){.dash-kpis{grid-template-columns:1fr 1fr}.dash-bottom{grid-template-columns:1fr}.dash-range-grid{grid-template-columns:1fr}.dash-range-grid .btn{width:100%}}
+</style>
+
+<style>
+input:not([type="email"]):not([type="password"]), textarea, select {
+  text-transform: uppercase;
+}
+</style>
+<style>input:not([type='email']):not([type='password']),textarea,select{text-transform:uppercase}</style><style>
+#memberForm input:not([type="email"]):not([type="password"]),#memberForm textarea,#memberForm select{text-transform:uppercase}
+#memberForm input[name="mobile"],#memberForm input[name="pin"],#memberForm input[name="aadhaar4"]{text-transform:none}
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.CAREER_NEST_SUPABASE_URL = "https://muonxagfjtjokbksnyqa.supabase.co";
+window.CAREER_NEST_SUPABASE_KEY = "sb_publishable_CYw3LeMYmt9x3d8k3vecKw_Q2kvO6Uv";
+window.careerNestSupabase = window.supabase.createClient(window.CAREER_NEST_SUPABASE_URL, window.CAREER_NEST_SUPABASE_KEY);
+</script>
+</head>
+<body>
+<div id="login" class="login">
+  <div class="login-card">
+    <div class="brand"><img src="data:image/webp;base64,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"><h1>CAREER NEST CRM</h1><p>Online Edition — Supabase Cloud</p></div>
+    <form id="loginForm">
+      <div class="field"><label>Email</label><input id="loginEmail" type="email" value="anubhavcrmcd@gmail.com" required></div>
+      <div class="field" style="margin-top:12px"><label>Password</label><input id="loginPassword" type="password"  required></div>
+      <button class="btn" style="width:100%;margin-top:16px">Sign In</button>
+      <p class="hint" style="margin-top:12px;text-align:center">Online login: use your Supabase Auth account</p>
+    </form>
+  </div>
+</div>
+
+<div id="app" class="app">
+  <aside class="sidebar">
+    <div class="side-brand"><img src="data:image/webp;base64,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"><b>CAREER NEST CRM</b><span style="font-size:10px;color:#9fb7d4">ONLINE EDITION</span></div>
+    <nav id="nav" class="nav"></nav>
+    <button class="nav button" style="margin-top:12px;background:#ffffff12;color:#fff" onclick="logout()">↪ Logout</button>
+  </aside>
+  <main class="main">
+    <div class="topbar"><h2 id="pageTitle">Dashboard</h2><div class="user-chip" id="userChip"></div></div>
+    <div id="content"></div>
+  </main>
+</div>
+
+<div id="modal" class="modal"><div class="modal-box"><div class="modal-head"><h3 id="modalTitle"></h3><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
+<div id="toast" class="toast"></div>
+
+
+<script>
+(function(){
+  // Production form rules:
+  // All normal text fields are automatically uppercased.
+  // Email and password remain case-sensitive/free-form.
+  function isExcluded(el){
+    return !el || ['EMAIL','PASSWORD'].includes((el.type || '').toUpperCase()) ||
+      ['email','password'].includes((el.id || '').toLowerCase());
+  }
+
+  function upperize(el){
+    if (!el || isExcluded(el)) return;
+    if (typeof el.value === 'string') el.value = el.value.toUpperCase();
+  }
+
+  document.addEventListener('input', function(e){
+    const el = e.target;
+    if (!el || !['INPUT','TEXTAREA','SELECT'].includes(el.tagName)) return;
+    if (isExcluded(el)) return;
+
+    // PAN: 5 letters + 4 digits + 1 letter.
+    const id = (el.id || '').toLowerCase();
+    const name = (el.name || '').toLowerCase();
+    if (id.includes('pan') || name.includes('pan')) {
+      el.value = el.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,10);
+    } else if (id.includes('ifsc') || name.includes('ifsc')) {
+      // IFSC is 11 alphanumeric characters; standard format is 4 letters + 0 + 6 alphanumeric.
+      el.value = el.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,11);
+    } else {
+      upperize(el);
+    }
+  }, true);
+
+  document.addEventListener('blur', function(e){
+    upperize(e.target);
+  }, true);
+
+  window.validateCareerNestFields = function(){
+    const errors = [];
+    document.querySelectorAll('input, textarea, select').forEach(function(el){
+      if (isExcluded(el)) return;
+      const id = (el.id || '').toLowerCase();
+      const name = (el.name || '').toLowerCase();
+      const value = (el.value || '').trim().toUpperCase();
+
+      if ((id.includes('pan') || name.includes('pan')) && value) {
+        if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(value)) {
+          errors.push('PAN must be 10 characters: 5 letters + 4 numbers + 1 letter.');
+        }
+      }
+      if ((id.includes('ifsc') || name.includes('ifsc')) && value) {
+        if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(value)) {
+          errors.push('IFSC must be 11 characters: 4 letters + 0 + 6 alphanumeric characters.');
+        }
+      }
+    });
+    return errors;
+  };
+})();
+</script>
+
+<script>
+const LOGO='data:image/webp;base64,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';
+const ROLES=['SUPER ADMIN','INDEPENDENT PROJECT MANAGER','STATE CHANNEL GROWTH MASTER','DISTRICT CHANNEL ASSOCIATE','INDEPENDENT CAREER CONSULTANT'];
+const ROLE_LABELS={'SUPER ADMIN':'SUPER ADMIN','INDEPENDENT PROJECT MANAGER':'INDEPENDENT PROJECT MANAGER','STATE CHANNEL GROWTH MASTER':'STATE GROWTH CHANNEL PARTNER','DISTRICT CHANNEL ASSOCIATE':'DISTRICT CHANNEL ASSOCIATE','INDEPENDENT CAREER CONSULTANT':'INDEPENDENT CAREER CONSULTANT'};
+const LINK_CHILD_ROLES={
+ 'SUPER ADMIN':['INDEPENDENT PROJECT MANAGER','STATE CHANNEL GROWTH MASTER','DISTRICT CHANNEL ASSOCIATE','INDEPENDENT CAREER CONSULTANT'],
+ 'INDEPENDENT PROJECT MANAGER':['STATE CHANNEL GROWTH MASTER','DISTRICT CHANNEL ASSOCIATE','INDEPENDENT CAREER CONSULTANT'],
+ 'STATE CHANNEL GROWTH MASTER':['DISTRICT CHANNEL ASSOCIATE','INDEPENDENT CAREER CONSULTANT'],
+ 'DISTRICT CHANNEL ASSOCIATE':['INDEPENDENT CAREER CONSULTANT']
+};
+const NAV=[
+ ['dashboard','Dashboard','◈'],['members','Members','♙'],['tree','Team Tree','⌘'],['registration','New Registration','＋'],['idcard','My ID Card','▣'],
+ ['products','Products','▤'],['sales','Sales','₹'],['ledger','Commission Ledger','≡'],['targets','Targets','◎'],['payouts','Payouts','⇄'],
+ ['settlement','Monthly Settlement','◫'],['kyc','KYC / Registration PDFs','▧'],['export','Excel / CSV Export','⇩'],['audit','Audit Log','◴'],['settings','Settings','⚙']
+];
+const state={db:null,user:null,page:'dashboard'};
+
+const req=p=>new Promise((res,rej)=>{p.onsuccess=()=>res(p.result);p.onerror=()=>rej(p.error)});
+const store=(n,m='readonly')=>state.db.transaction(n,m).objectStore(n);
+const all=n=>req(store(n).getAll()), get=(n,id)=>req(store(n).get(id)), put=(n,o)=>req(store(n,'readwrite').put(o));
+const del=(n,id)=>req(store(n,'readwrite').delete(id)), clear=n=>req(store(n,'readwrite').clear());
+
+async function initDB(){
+ return new Promise((resolve,reject)=>{
+  const r=indexedDB.open('CareerNestCRM_Offline',1);
+  r.onupgradeneeded=e=>{const db=e.target.result;
+   ['members','products','sales','targets','payouts','audit','settings'].forEach(n=>{if(!db.objectStoreNames.contains(n))db.createObjectStore(n,{keyPath:'id',autoIncrement:true})});
+  };
+  r.onsuccess=async()=>{state.db=r.result;await seed();resolve()};r.onerror=()=>reject(r.error);
+ });
+}
+async function seed(){
+ if(!(await all('members')).length){
+  await put('members',{email:'admin@careernest.local',password:'Admin@123',name:'SUPER ADMIN',father:'',dob:'',mobile:'',address:'',state:'MADHYA PRADESH',district:'JABALPUR',city:'JABALPUR',pin:'',pan:'',aadhaar4:'',accountName:'',bank:'',accountNo:'',ifsc:'',photo:'',aadhaarDoc:'',panDoc:'',cheque:'',signature:'',role:'SUPER ADMIN',parentId:null,status:'ACTIVE',memberId:'CN-ADMIN',joiningDate:new Date().toISOString().slice(0,10),commissionType:'PERCENTAGE',commissionValue:0,createdAt:new Date().toISOString()});
+  await put('products',{name:'Sample Product',sku:'SAMPLE-001',price:7080,gst:1080,base:6000,description:'Replace with your real product.',status:'ACTIVE'});
+ }
+ if(!(await all('settings')).length)await put('settings',{key:'main',brand:'CAREER NEST',website:'www.careerdekho.org',phone:'9755636437',address:'JABALPUR, MADHYA PRADESH, INDIA',tds:5,adminEmail:'anubhavcrmcd@gmail.com'});
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
+function esc(v=''){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function money(v){return '₹'+Number(v||0).toLocaleString('en-IN',{maximumFractionDigits:2})}
+function uid(p='CN'){return p+'-'+new Date().getFullYear()+'-'+String(Math.floor(100000+Math.random()*900000))}
+function normalizeRoleCode(r){
+  const x=String(r||'').trim().toUpperCase();
+  return ({'SUPER_ADMIN':'SUPER ADMIN','INDEPENDENT_PROJECT_MANAGER':'INDEPENDENT PROJECT MANAGER','STATE_CHANNEL_GROWTH_MASTER':'STATE CHANNEL GROWTH MASTER','DISTRICT_CHANNEL_ASSOCIATE':'DISTRICT CHANNEL ASSOCIATE','INDEPENDENT_CAREER_CONSULTANT':'INDEPENDENT CAREER CONSULTANT'}[x]||x);
+}
+function isAdmin(){return state.user?.role==='SUPER ADMIN'}
+function roleRank(r){return ROLES.indexOf(r)}
+async function audit(action,recordId='',details=''){await put('audit',{user:state.user?.memberId||'SYSTEM',action,recordId,details,dateTime:new Date().toISOString(),ip:'LOCAL'})}
+async function settings(){const x=await all('settings');return x[0]||{tds:5}}
+function scopeMembers(ms){
+ if(isAdmin())return ms;
+ const ids=new Set([state.user.id]);let loop=true;
+ while(loop){loop=false;for(const m of ms)if(m.parentId&&ids.has(m.parentId)&&!ids.has(m.id)){ids.add(m.id);loop=true}}
+ return ms.filter(m=>ids.has(m.id));
+}
+function memberName(id,ms){const m=ms.find(x=>x.id==id);return m?m.name:'—'}
+function memberMemberId(id,ms){const m=ms.find(x=>Number(x.id)===Number(id));return m?m.memberId:'—'}
+async function openMemberIDCard(id){const m=await get('members',Number(id));if(!m)return toast('MEMBER NOT FOUND');const aa=await all('members');document.getElementById('modalTitle').textContent='MEMBER ID CARD';document.getElementById('modalBody').innerHTML=`<div class="actions"><button class="btn green" onclick="printIDPair()">PRINT ID CARD</button></div><div id="idPrint">${idCardPairHTML(m,aa)}</div>`;document.getElementById('modal').classList.add('show')}
+function memberScopeIds(ms){return new Set(scopeMembers(ms).map(m=>m.id))}
+function scopedSales(ms,sales){const ids=memberScopeIds(ms);return sales.filter(s=>ids.has(Number(s.sellerId)))}
+function scopedTargets(ms,targets){const ids=memberScopeIds(ms);return targets.filter(t=>ids.has(Number(t.memberId)))}
+function scopedPayouts(ms,payouts){const ids=memberScopeIds(ms);return payouts.filter(p=>ids.has(Number(p.memberId)))}
+function scopedAudits(ms,audits){
+ if(isAdmin()) return audits;
+ const ids=new Set(scopeMembers(ms).map(m=>m.memberId));
+ return audits.filter(a=>ids.has(a.user)||a.user===state.user?.memberId);
+}
+function inDateRange(date,from,to){const d=String(date||'').slice(0,10);return (!from||d>=from)&&(!to||d<=to)}
+function dashboardRangeHTML(from='',to=''){return `<div class="card" style="margin-bottom:14px"><div class="section-title"><h3>SALES & PAYOUT DATE RANGE</h3><button class="btn" onclick="clearDashboardRange()">CLEAR</button></div><div class="form-grid"><div class="field"><label>FROM DATE</label><input id="dashFrom" type="date" value="${from}"></div><div class="field"><label>TO DATE</label><input id="dashTo" type="date" value="${to}"></div><div class="field"><label>VIEW</label><select id="dashView"><option value="SUMMARY">SUMMARY</option><option value="DAY">DAY</option><option value="WEEK">WEEK</option><option value="MONTH">MONTH</option></select></div><div class="field" style="display:flex;align-items:end"><button class="btn green" onclick="applyDashboardRange()">APPLY DATE RANGE</button></div></div></div>`}
+function dashboardDateRows(sales,payouts,from,to){
+ const ss=sales.filter(s=>inDateRange(s.date,from,to));
+ const pp=payouts.filter(p=>p.status==='PAID'&&inDateRange(p.paymentDate,from,to));
+ const saleStats={sales:ss.reduce((a,x)=>a+Number(x.total||0),0),gross:ss.reduce((a,x)=>a+Number(x.commission||0),0),tds:ss.reduce((a,x)=>a+Number(x.tds||0),0),net:ss.reduce((a,x)=>a+netPayable(x),0),paid:pp.reduce((a,x)=>a+Number(x.net||0),0)};
+ return {ss,pp,...saleStats};
+}
+function dashboardGroupRows(sales,payouts,from,to,view){
+ const ss=sales.filter(s=>inDateRange(s.date,from,to)),pp=payouts.filter(p=>p.status==='PAID'&&inDateRange(p.paymentDate,from,to));
+ const groups={};
+ const keyFor=(d)=>{const dt=new Date(d+'T00:00:00');if(view==='DAY')return d;if(view==='MONTH')return d.slice(0,7);if(view==='WEEK'){const x=new Date(dt);const day=x.getDay()||7;x.setDate(x.getDate()-day+1);return x.toISOString().slice(0,10)}return 'SELECTED RANGE'};
+ ss.forEach(s=>{const k=keyFor(String(s.date||'').slice(0,10));groups[k]??={sales:0,gross:0,tds:0,net:0,paid:0};groups[k].sales+=Number(s.total||0);groups[k].gross+=Number(s.commission||0);groups[k].tds+=Number(s.tds||0);groups[k].net+=netPayable(s)});
+ pp.forEach(p=>{const k=keyFor(String(p.paymentDate||'').slice(0,10));groups[k]??={sales:0,gross:0,tds:0,net:0,paid:0};groups[k].paid+=Number(p.net||0)});
+ return Object.entries(groups).sort((a,b)=>b[0].localeCompare(a[0])).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${money(v.sales)}</td><td>${money(v.gross)}</td><td>${money(v.tds)}</td><td>${money(v.net)}</td><td>${money(v.paid)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">NO DATA FOR SELECTED RANGE</td></tr>';
+}
+function clearDashboardRange(){go('dashboard')}
+function applyDashboardRange(){const f=document.getElementById('dashFrom')?.value||'',t=document.getElementById('dashTo')?.value||'',v=document.getElementById('dashView')?.value||'SUMMARY';renderDashboardWithRange(f,t,v)}
+async function renderDashboardWithRange(from,to,view){
+ const c=document.getElementById('content');
+ const aa=await all('members'), ms=scopeMembers(aa), salesAll=await all('sales'), payoutsAll=await all('payouts');
+ const ss=scopedSales(aa,salesAll).filter(s=>inDateRange(s.date,from,to));
+ const pp=scopedPayouts(aa,payoutsAll).filter(p=>p.status==='PAID'&&inDateRange(p.paymentDate,from,to));
+ const salesTotal=ss.reduce((a,x)=>a+Number(x.total||0),0);
+ const gross=ss.reduce((a,x)=>a+Number(x.commission||0),0);
+ const tds=ss.reduce((a,x)=>a+Number(x.tds||0),0);
+ const net=ss.reduce((a,x)=>a+netPayable(x),0);
+ const paid=pp.reduce((a,x)=>a+Number(x.net||0),0);
+ const sellerMap=new Map();
+ ss.forEach(s=>{const id=Number(s.sellerId);const m=ms.find(x=>Number(x.id)===id)||{};const row=sellerMap.get(id)||{id,name:m.name||'UNKNOWN',role:m.role||'',memberId:m.memberId||'',gross:0,net:0,sales:0};row.gross+=Number(s.commission||0);row.net+=netPayable(s);row.sales+=Number(s.total||0);sellerMap.set(id,row)});
+ const top=[...sellerMap.values()].sort((a,b)=>b.gross-a.gross);
+ const initials=n=>String(n||'?').split(/\\s+/).map(x=>x[0]).slice(0,2).join('').toUpperCase();
+ const sellerCell=m=>{const img=m.photo?`<img src="${m.photo}" alt="">`:`<span>${esc(initials(m.name))}</span>`;return `<div class="dash-seller"><div class="dash-avatar">${img}</div><div><b>${esc(m.name||'—')}</b><br><small>${esc(ROLE_LABELS[m.role]||m.role||'MEMBER')}</small></div></div>`};
+ const rows=ss.map((s,i)=>{const m=ms.find(x=>Number(x.id)===Number(s.sellerId))||{};const d=String(s.date||'').slice(0,10);let when=esc(d);if(s.createdAt)when+=`<br><small>${esc(new Date(s.createdAt).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}))}</small>`;return `<tr><td>${i+1}</td><td><b>${esc(s.saleId||s.id||'—')}</b></td><td>${when}</td><td>${sellerCell(m)}</td><td><b>${esc(m.memberId||'—')}</b></td><td><div class="dash-idmini"><b>CAREER NEST</b><span>${esc(m.memberId||'ID CARD')}</span></div></td><td>${esc(s.productName||'—')}</td><td>${Number(s.quantity||1)}</td><td>${money(s.total||0)}</td><td>${money(s.commission||0)}</td><td>${money(s.tds||0)}</td><td class="dash-net">${money(netPayable(s))}</td><td><div class="dash-status"><span class="ok">${esc(s.status||'COMPLETED')}</span><span class="pay">${s.paid?'PAID':'UNPAID'}</span></div></td></tr>`}).join('')||`<tr><td colspan="13" class="empty">NO SALES FOR SELECTED RANGE</td></tr>`;
+ const topRows=top.slice(0,5).map((m,i)=>`<div class="dash-list-row"><div class="dash-rank">${['🥇','🥈','🥉','4','5'][i]}</div><div>${sellerCell(m)}<small>${esc(m.memberId)}</small></div><div><b>${money(m.gross)}</b><br><small class="dash-net">${money(m.net)}</small></div></div>`).join('')||'<div class="empty">NO SALES DATA</div>';
+ const breakdown=dashboardGroupRows(ss,pp,from,to,view||'SUMMARY');
+ c.innerHTML=`<div class="dashboard-page">
+  <div class="card dash-range"><div class="section-title"><h3>SALES & PAYOUT DATE RANGE</h3><button class="btn light" onclick="clearDashboardRange()">CLEAR</button></div><div class="dash-range-grid"><div class="field"><label>FROM DATE</label><input id="dashFrom" type="date" value="${esc(from||'')}"></div><div class="field"><label>TO DATE</label><input id="dashTo" type="date" value="${esc(to||'')}"></div><div class="field"><label>VIEW</label><select id="dashView"><option value="SUMMARY" ${view==='SUMMARY'?'selected':''}>SUMMARY</option><option value="DAY" ${view==='DAY'?'selected':''}>DAY</option><option value="WEEK" ${view==='WEEK'?'selected':''}>WEEK</option><option value="MONTH" ${view==='MONTH'?'selected':''}>MONTH</option></select></div><button class="btn green" onclick="applyDashboardRange()">APPLY DATE RANGE</button><button class="btn dash-export" onclick="exportCSV('sales')">EXPORT SALES (EXCEL)</button></div></div>
+  <div class="dash-kpis">
+   <div class="card dash-kpi"><div class="dash-icon blue">🛒</div><div><small>TOTAL SALES</small><strong>${money(salesTotal)}</strong><div class="dash-sub">(SELECTED RANGE)</div></div></div>
+   <div class="card dash-kpi"><div class="dash-icon green">₹</div><div><small>GROSS COMMISSION</small><strong>${money(gross)}</strong><div class="dash-sub">(BEFORE TDS)</div></div></div>
+   <div class="card dash-kpi"><div class="dash-icon red">%</div><div><small>TDS DEDUCTED</small><strong>${money(tds)}</strong></div></div>
+   <div class="card dash-kpi"><div class="dash-icon purple">▣</div><div><small>NET PAYABLE COMMISSION</small><strong>${money(net)}</strong><div class="dash-sub green">(COMMISSION - TDS)</div></div></div>
+   <div class="card dash-kpi"><div class="dash-icon orange">✓</div><div><small>NET PAID COMMISSION</small><strong>${money(paid)}</strong><div class="dash-sub">(MARKED AS PAID)</div></div></div>
+  </div>
+  <div class="card dash-section"><div class="section-title"><h3>SALES SUMMARY (SELECTED RANGE)</h3><button class="btn dash-export" onclick="exportCSV('sales')">EXPORT SALES (EXCEL)</button></div><div class="table-wrap"><table class="dash-table"><thead><tr><th>S.NO</th><th>SALE ID</th><th>DATE & TIME</th><th>SELLER (NAME)</th><th>MEMBER ID</th><th>ID CARD</th><th>PRODUCT</th><th>QTY</th><th>TOTAL (₹)</th><th>GROSS COMMISSION (₹)</th><th>TDS (₹)</th><th>NET PAYABLE (₹)</th><th>STATUS</th></tr></thead><tbody>${rows}</tbody><tfoot><tr class="dash-total"><td colspan="7">TOTAL</td><td>${ss.reduce((a,x)=>a+Number(x.quantity||0),0)}</td><td>${money(salesTotal)}</td><td>${money(gross)}</td><td>${money(tds)}</td><td>${money(net)}</td><td></td></tr></tfoot></table></div></div>
+  <div class="dash-bottom">
+   <div class="card dash-section"><h3 style="margin-top:0">🏆 TOP SELLERS (BY GROSS COMMISSION)</h3><div class="dash-list">${topRows}</div></div>
+   <div class="card dash-section"><h3 style="margin-top:0">💳 PAYMENT OVERVIEW (SELECTED RANGE)</h3><div class="dash-payment-row purple"><span>Total Gross Commission</span><span>${money(gross)}</span></div><div class="dash-payment-row red"><span>Total TDS Deducted</span><span>${money(tds)}</span></div><div class="dash-payment-row green"><span>Total Net Payable</span><span>${money(net)}</span></div><div class="dash-payment-row blue"><span>Total Net Paid</span><span>${money(paid)}</span></div></div>
+   <div class="card dash-section dash-actions-card"><h3 style="margin-top:0">⚡ QUICK ACTIONS</h3><div class="dash-actions"><button class="btn green" onclick="go('sales')">+ New Sale</button><button class="btn gold" onclick="go('payouts')">Payout / Payment Center</button><button class="btn" onclick="openMyRegistrationLinks()">My Registration Links</button><button class="btn" onclick="openMemberTreeSearch()">Team Tree</button></div></div>
+  </div>
+  <div class="card dash-section"><h3 style="margin-top:0">DATE RANGE BREAKDOWN — ${esc(view||'SUMMARY')}</h3><div class="table-wrap"><table><thead><tr><th>PERIOD</th><th>SALES</th><th>GROSS COMMISSION</th><th>TDS</th><th>NET PAYABLE</th><th>NET PAID</th></tr></thead><tbody>${breakdown}</tbody></table></div></div>
+ </div>`;
+}
+
+function subtreeIds(root,ms){const ids=new Set([root]);let loop=true;while(loop){loop=false;for(const m of ms)if(m.parentId&&ids.has(m.parentId)&&!ids.has(m.id)){ids.add(m.id);loop=true}}return ids}
+function rootPM(m,ms){let x=m,guard=0;while(x&&guard++<20){if(x.role==='INDEPENDENT PROJECT MANAGER')return x;x=ms.find(a=>a.id===x.parentId)}return null}
+function allocationForPM(pmId,ms,exclude=null){const ids=subtreeIds(pmId,ms);return ms.filter(m=>ids.has(m.id)&&m.id!==pmId&&m.id!==exclude&&m.commissionType==='PERCENTAGE').reduce((a,m)=>a+Number(m.commissionValue||0),0)}
+
+function netPayable(s){return Math.max(0,Number(s.commission||0)-Number(s.tds||0))}
+function teamSalesFor(memberId,ms,sales){
+ const ids=subtreeIds(memberId,ms); return sales.filter(s=>ids.has(s.sellerId));
+}
+function payoutRollup(memberId,ms,sales){
+ const rows=teamSalesFor(memberId,ms,sales);
+ return {sales:rows.reduce((a,s)=>a+Number(s.total||0),0),gross:rows.reduce((a,s)=>a+Number(s.commission||0),0),tds:rows.reduce((a,s)=>a+Number(s.tds||0),0),net:rows.reduce((a,s)=>a+netPayable(s),0),count:rows.length};
+}
+function directTeamPayouts(member,ms,sales){
+ const children=ms.filter(m=>Number(m.parentId)===Number(member.id));
+ return children.map(ch=>({member:ch,rollup:payoutRollup(ch.id,ms,sales)}));
+}
+function payoutStatsCard(title,r){return `<div class="card" style="margin:12px 0"><h3>${esc(title)}</h3><div class="grid four"><div><small>TEAM SALES</small><h3>${money(r.sales)}</h3></div><div><small>GROSS COMMISSION</small><h3>${money(r.gross)}</h3></div><div><small>TDS</small><h3>${money(r.tds)}</h3></div><div><small>TOTAL PAYABLE</small><h3>${money(r.net)}</h3></div></div></div>`}
+function paymentExportRows(member,ms,sales){
+ const rows=teamSalesFor(member.id,ms,sales);
+ return rows.map(function(s){
+  const seller=ms.find(function(m){return m.id===s.sellerId});
+  return {payTo:member.name,payToMemberId:member.memberId,actualSeller:seller?seller.name:'',actualSellerId:seller?seller.memberId:'',saleId:s.saleId,date:s.date,product:s.productName,total:s.total,grossCommission:s.commission,tds:s.tds,totalPayable:netPayable(s),status:s.payoutId?'PAID':'UNPAID'};
+ });
+}
+function downloadPaymentCSV(filename,rows){if(!rows.length)return toast('NO PAYMENT DATA');const keys=Object.keys(rows[0]),csv=[keys.join(','),...rows.map(o=>keys.map(k=>`"${String(o[k]??'').replaceAll('"','""')}"`).join(','))].join('\n');download(filename,csv,'text/csv')}
+
+function buildNav(){
+ const n=document.getElementById('nav');n.innerHTML='';
+ NAV.forEach(([id,label,icon])=>{const b=document.createElement('button');b.dataset.page=id;b.innerHTML=icon+' &nbsp;'+label;b.onclick=()=>go(id);n.appendChild(b)});
+ if(!isAdmin())['products','audit'].forEach(x=>{const b=n.querySelector(`[data-page="${x}"]`);if(b)b.style.display='none'});
+}
+function go(p){state.page=p;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===p));document.getElementById('pageTitle').textContent=NAV.find(x=>x[0]===p)?.[1]||'Dashboard';render(p)}
+async function render(p){const c=document.getElementById('content');c.innerHTML='<div class="card">Loading…</div>';await (views[p]||views.dashboard)(c)}
+function logout(){state.user=null;document.getElementById('app').style.display='none';document.getElementById('login').style.display='grid'}
+document.getElementById('loginForm').onsubmit=async e=>{
+ e.preventDefault();
+ const email=document.getElementById('loginEmail').value.trim().toLowerCase();
+ const pw=document.getElementById('loginPassword').value;
+ if(!window.careerNestSupabase)return toast('Supabase is not available');
+ const {data,error}=await window.careerNestSupabase.auth.signInWithPassword({email,password:pw});
+ if(error){ toast(error.message || 'Invalid login'); return; }
+ const authUser=data.user;
+ const {data:m,error:me}=await window.careerNestSupabase.from('members').select('*, roles:role_id(code)').eq('auth_user_id',authUser.id).maybeSingle();
+ if(me){ console.error('Member lookup failed:',me); await window.careerNestSupabase.auth.signOut(); toast('Unable to load member profile: '+(me.message||'database error')); return; }
+ if(!m){ await window.careerNestSupabase.auth.signOut(); toast('Member profile not found for this Supabase Auth user'); return; }
+ if(String(m.status||'').toUpperCase()!=='ACTIVE'){ await window.careerNestSupabase.auth.signOut(); toast('Your account is not active'); return; }
+ const roleCode=normalizeRoleCode(Array.isArray(m.roles)?(m.roles[0]?.code||'MEMBER'):(m.roles?.code||'MEMBER'));
+ state.user={...m, id:m.id, memberId:m.member_id, name:m.full_name, role:roleCode, role_id:m.role_id, status:m.status, authUserId:authUser.id};
+ document.getElementById('login').style.display='none';
+ document.getElementById('app').style.display='block';
+ document.getElementById('userChip').textContent=(m.full_name||email)+' • '+roleCode;
+ buildNav();
+ try{await audit('LOGIN',m.member_id)}catch(_){}
+ go('dashboard');
+};
+
+async function forgotPassword(){
+ const email=document.getElementById('loginEmail').value.trim().toLowerCase();
+ if(!email){toast('Enter your email first');return;}
+ const {error}=await window.careerNestSupabase.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('?')[0]});
+ if(error)toast(error.message); else toast('Password reset email sent');
+}
+
+
+const views={
+ dashboard:async c=>{const now=new Date(),from=new Date(now.getFullYear(),now.getMonth(),1).toISOString().slice(0,10),to=now.toISOString().slice(0,10);await renderDashboardWithRange(from,to,'SUMMARY');},
+members:async c=>{
+ const {data:rows,error}=await window.careerNestSupabase.from('members').select('*, roles:role_id(code)').order('created_at',{ascending:false});
+ if(error){c.innerHTML=`<div class=\"card\"><div class=\"empty\">UNABLE TO LOAD MEMBERS: ${esc(error.message)}</div></div>`;return;}
+ const roleOf=m=>m.roles?.code||'MEMBER';
+ const nameOf=m=>m.full_name||m.name||'—';
+ const idOf=m=>m.member_id||'—';
+ const parentMap=new Map((rows||[]).map(m=>[String(m.id),nameOf(m)]));
+ const render=arr=>arr.map(m=>`<tr><td><b>${esc(nameOf(m))}</b><br><small>${esc(m.email||'')}</small></td><td>${esc(roleOf(m))}</td><td>${esc(idOf(m))}</td><td>${esc(parentMap.get(String(m.parent_member_id))||'—')}</td><td>${esc(m.state_name||m.state||'—')} / ${esc(m.district_name||m.district||'—')}</td><td>${esc(m.status||'—')}</td><td><button class=\"btn small light\" onclick=\"showOnlineMember('${String(m.id)}')\">VIEW</button></td></tr>`).join('')||'<tr><td colspan=\"7\" class=\"empty\">NO MEMBERS FOUND</td></tr>';
+ c.innerHTML=`<div class=\"card\"><div class=\"section-title\"><div><h3>MEMBERS</h3><div class=\"hint\">LIVE SUPABASE MEMBERS IN YOUR ALLOWED SCOPE</div></div></div><div class=\"field\"><label>SEARCH MEMBER</label><input id=\"onlineMemberSearch\" placeholder=\"SEARCH BY NAME / MEMBER ID / MOBILE / EMAIL\"></div><div class=\"table-wrap\"><table><thead><tr><th>MEMBER</th><th>ROLE</th><th>MEMBER ID</th><th>PARENT / UNDER</th><th>LOCATION</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody id=\"onlineMemberRows\">${render(rows||[])}</tbody></table></div></div>`;
+ window.showOnlineMember=async id=>{const m=(rows||[]).find(x=>String(x.id)===String(id));if(!m)return;document.getElementById('modalTitle').textContent='MEMBER PROFILE';document.getElementById('modalBody').innerHTML=`<div class=\"card\"><h3>${esc(nameOf(m))}</h3><p><b>Member ID:</b> ${esc(idOf(m))}</p><p><b>Email:</b> ${esc(m.email||'—')}</p><p><b>Mobile:</b> ${esc(m.mobile||'—')}</p><p><b>Role:</b> ${esc(roleOf(m))}</p><p><b>Status:</b> ${esc(m.status||'—')}</p><p><b>State:</b> ${esc(m.state_name||m.state||'—')}</p><p><b>District:</b> ${esc(m.district_name||m.district||'—')}</p></div>`;document.getElementById('modal').classList.add('show')};
+ document.getElementById('onlineMemberSearch').oninput=e=>{const q=e.target.value.toUpperCase();document.getElementById('onlineMemberRows').innerHTML=render((rows||[]).filter(m=>[nameOf(m),idOf(m),m.email,m.mobile,roleOf(m),m.status].some(v=>String(v||'').toUpperCase().includes(q))))};
+},
+tree:async c=>{
+ const {data:rows,error}=await window.careerNestSupabase.from('members').select('*, roles:role_id(code)').order('created_at',{ascending:false});
+ if(error){c.innerHTML=`<div class=\"card\"><div class=\"empty\">UNABLE TO LOAD TEAM TREE: ${esc(error.message)}</div></div>`;return;}
+ const roleOf=m=>m.roles?.code||'MEMBER'; const nameOf=m=>m.full_name||m.name||'—'; const idOf=m=>m.member_id||'—'; const byId=new Map((rows||[]).map(m=>[String(m.id),m]));
+ const roleFilter=()=>document.getElementById('onlineTreeRole')?.value||'';
+ const render=()=>{const q=(document.getElementById('onlineTreeSearch')?.value||'').toUpperCase(),r=roleFilter();const arr=(rows||[]).filter(m=>(!r||roleOf(m)===r)&&(!q||[nameOf(m),idOf(m),m.email,m.mobile].some(v=>String(v||'').toUpperCase().includes(q))));document.getElementById('onlineTreeRows').innerHTML=arr.map(m=>{const p=byId.get(String(m.parent_member_id));return `<div class=\"card\" style=\"padding:12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center\"><div><b>${esc(nameOf(m))}</b><br><small>${esc(roleOf(m))} • ${esc(idOf(m))} • ${esc(m.status||'—')}</small><br><small>UNDER: ${esc(p?nameOf(p):'TOP LEVEL')}</small></div></div>`}).join('')||'<div class=\"empty\">NO MEMBERS FOUND</div>'};
+ c.innerHTML=`<div class=\"card\"><div class=\"section-title\"><div><h3>TEAM TREE</h3><div class=\"hint\">LIVE SUPABASE TEAM TREE — YOUR ALLOWED SCOPE</div></div></div><div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px\"><select id=\"onlineTreeRole\"><option value=\"\">ALL ROLES</option><option value=\"INDEPENDENT_PROJECT_MANAGER\">PROJECT MANAGER</option><option value=\"STATE_CHANNEL_GROWTH_MASTER\">STATE CHANNEL GROWTH MASTER</option><option value=\"DISTRICT_CHANNEL_ASSOCIATE\">DISTRICT CHANNEL ASSOCIATE</option><option value=\"INDEPENDENT_CAREER_CONSULTANT\">CAREER CONSULTANT</option></select><input id=\"onlineTreeSearch\" placeholder=\"SEARCH NAME OR MEMBER ID\" style=\"flex:1;min-width:220px\"></div><div id=\"onlineTreeRows\"></div></div>`;document.getElementById('onlineTreeRole').onchange=render;document.getElementById('onlineTreeSearch').oninput=render;render();
+},
+registration:async c=>{const owner=state.user;c.innerHTML=`<div class="card"><div class="section-title"><div><h3>NEW REGISTRATION</h3><div class="hint">ONLINE REGISTRATION LINKS AND PENDING REGISTRATIONS</div></div><button class="btn green" onclick="openMemberForm()">+ NEW REGISTRATION</button></div><div class="card" style="padding:14px"><h3>MY REGISTRATION LINKS</h3>${owner?linkRowsFor(owner):'<div class="empty">LOGIN REQUIRED</div>'}</div><div class="card" style="margin-top:16px"><h3>PENDING REGISTRATIONS</h3><div id="pendingRegistrationRows"><div class="empty">ONLINE PENDING REGISTRATION SYNC WILL APPEAR HERE</div></div></div></div>`;},
+  idcard:async c=>{const aa=await all('members'),ms=scopeMembers(aa),me=ms.find(m=>Number(m.id)===Number(state.user.id))||ms[0];c.innerHTML=`<div class="card"><div class="section-title"><h3>MEMBER ID CARDS</h3><button class="btn green" onclick="printIDPair()">PRINT ID CARD</button></div><div class="field"><label>SELECT MEMBER</label><select id="idMemberSelect" onchange="renderSelectedIDCard()">${ms.map(m=>`<option value="${m.id}" ${me&&Number(m.id)===Number(me.id)?'selected':''}>${esc(m.name)} • ${esc(m.memberId)}</option>`).join('')}</select></div><div id="idPrint" style="margin-top:16px"></div></div>`;if(ms.length)await renderSelectedIDCard()},
+ products:async c=>{const ps=await all('products');c.innerHTML=`<div class="card"><div class="section-title"><h3>Products (${ps.length})</h3><button class="btn green" onclick="openProductForm()">+ Add Product</button></div><div class="table-wrap"><table><thead><tr><th>Name</th><th>SKU</th><th>Selling Price</th><th>GST</th><th>Commission Base</th><th>Status</th><th></th></tr></thead><tbody>${ps.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.sku)}</td><td>${money(p.price)}</td><td>${money(p.gst)}</td><td>${money(p.base)}</td><td>${esc(p.status)}</td><td><button class="btn small" onclick="openProductForm(${p.id})">Edit</button> <button class="btn small red" onclick="deleteProduct(${p.id})">Delete</button></td></tr>`).join('')}</tbody></table></div></div>`},
+ sales:async c=>{const aa=await all('members'),ms=scopeMembers(aa),ss=(await all('sales')).filter(x=>ms.some(m=>m.id===x.sellerId));c.innerHTML=`<div class="card"><div class="section-title"><h3>Sales (${ss.length})</h3><button class="btn green" onclick="openSaleForm()">+ Record Sale</button></div><div class="table-wrap"><table><thead><tr><th>Sale ID / Date</th><th>SELLER NAME</th><th>MEMBER ID</th><th>ID CARD</th><th>Customer</th><th>Product</th><th>Total</th><th>Gross Commission</th><th>TDS</th><th>NET PAYABLE COMMISSION</th><th>Status</th></tr></thead><tbody>${ss.sort((a,b)=>b.id-a.id).map(x=>`<tr><td>${esc(x.saleId)}<br><small>${esc(x.date)}</small></td><td><b>${esc(memberName(x.sellerId,aa))}</b></td><td>${esc(memberMemberId(x.sellerId,aa))}</td><td><button class="btn small light" onclick="openMemberIDCard(${x.sellerId})">VIEW ID CARD</button></td><td>${esc(x.customerName)}<br>${esc(x.customerMobile)}</td><td>${esc(x.productName)} × ${x.quantity}</td><td>${money(x.total)}</td><td>${money(x.commission)}</td><td>${money(x.tds)}</td><td><b>${money(netPayable(x))}</b></td><td><span class="badge active">${esc(x.status)}</span></td></tr>`).join('')}</tbody></table></div></div>`},
+ ledger:async c=>{const aa=await all('members'),ms=scopeMembers(aa),ss=(await all('sales')).filter(x=>ms.some(m=>m.id===x.sellerId));c.innerHTML=`<div class="card"><div class="section-title"><h3>Commission Ledger</h3></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Sale</th><th>SELLER NAME</th><th>MEMBER ID</th><th>ID CARD</th><th>Base</th><th>Gross Commission</th><th>TDS</th><th>NET PAYABLE COMMISSION</th><th>Status</th></tr></thead><tbody>${ss.sort((a,b)=>b.id-a.id).map(x=>`<tr><td>${x.date}</td><td>${x.saleId}</td><td><b>${esc(memberName(x.sellerId,aa))}</b></td><td>${esc(memberMemberId(x.sellerId,aa))}</td><td><button class="btn small light" onclick="openMemberIDCard(${x.sellerId})">VIEW ID CARD</button></td><td>${money(x.base)}</td><td>${money(x.commission)}</td><td>${money(x.tds)}</td><td><b>${money(netPayable(x))}</b></td><td>${x.payoutId?'PAID':'UNPAID'}</td></tr>`).join('')}</tbody></table></div></div>`},
+ targets:async c=>{const aa=await all('members'),ms=scopeMembers(aa),ts=await all('targets'),ss=await all('sales');c.innerHTML=`<div class="card"><div class="section-title"><h3>Targets</h3><button class="btn green" onclick="openTargetForm()">+ Set Target</button></div><div class="table-wrap"><table><thead><tr><th>Member</th><th>Month</th><th>Amount</th><th>Achieved</th><th>Progress</th><th>Units</th></tr></thead><tbody>${ts.filter(t=>ms.some(m=>m.id===t.memberId)).map(t=>{const achieved=ss.filter(s=>s.sellerId===t.memberId&&String(s.date).slice(0,7)===t.month).reduce((a,x)=>a+Number(x.total||0),0),pct=t.amount?Math.min(100,achieved/t.amount*100):0,units=ss.filter(s=>s.sellerId===t.memberId&&String(s.date).slice(0,7)===t.month).reduce((a,x)=>a+Number(x.quantity||0),0);return `<tr><td>${memberName(t.memberId,aa)}</td><td>${t.month}</td><td>${money(t.amount)}</td><td>${money(achieved)}</td><td style="min-width:180px"><div class="progress"><i style="width:${pct}%"></i></div><small>${pct.toFixed(1)}%</small></td><td>${units} / ${t.units}</td></tr>`}).join('')}</tbody></table></div></div>`},
+ payouts:async c=>{const aa=await all('members'),ms=scopeMembers(aa),ss=await all('sales');
+ const me=state.user, roll=payoutRollup(me.id,ms,ss), children=directTeamPayouts(me,ms,ss);
+ const adminRows=isAdmin()?aa.filter(m=>m.role==='INDEPENDENT PROJECT MANAGER').map(pm=>({member:pm,rollup:payoutRollup(pm.id,aa,ss)})):[];
+ const rows=isAdmin()?adminRows:children;
+ c.innerHTML=`<div class="card"><div class="section-title"><h3>${isAdmin()?'SUPER ADMIN → PROJECT MANAGER PAYMENT CENTER':'TEAM PAYMENT CENTER'}</h3><button class="btn" onclick="exportPaymentCenter()">EXPORT PAYMENT EXCEL/CSV</button></div>
+ ${isAdmin()?'<p class="settings-note">Super Admin pays each Independent Project Manager. Each Project Manager then pays their own team. Team sales remain visible under the correct tree.</p>':'<p class="settings-note">Your payable amount includes the complete team under each direct child. You receive from your parent and settle your own team below.</p>'}
+ ${payoutStatsCard(isAdmin()?'TOTAL PROJECT MANAGER TREE PAYABLE':'YOUR COMPLETE TREE PAYABLE',isAdmin()?adminRows.reduce((a,x)=>({sales:a.sales+x.rollup.sales,gross:a.gross+x.rollup.gross,tds:a.tds+x.rollup.tds,net:a.net+x.rollup.net,count:a.count+x.rollup.count}),{sales:0,gross:0,tds:0,net:0,count:0}):roll)}
+ <div class="table-wrap"><table><thead><tr><th>PAY TO</th><th>TEAM SALES</th><th>GROSS COMMISSION</th><th>TDS</th><th>TOTAL PAYABLE</th><th>PAYMENT LEVEL</th></tr></thead><tbody>${rows.map(x=>`<tr><td><b>${esc(x.member.name)}</b><br><small>${esc(x.member.memberId)} • ${esc(x.member.role)}</small></td><td>${money(x.rollup.sales)}</td><td>${money(x.rollup.gross)}</td><td>${money(x.rollup.tds)}</td><td><b>${money(x.rollup.net)}</b></td><td>${isAdmin()?'SUPER ADMIN PAYS PM':'PARENT PAYS CHILD'}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">NO TEAM PAYABLES</td></tr>'}</tbody></table></div>
+ <div class="card" style="margin-top:16px"><h3>${isAdmin()?'PROJECT MANAGER PAYMENT DETAIL':'DIRECT TEAM SETTLEMENT DETAIL'}</h3>${rows.map(x=>`<div class="card" style="padding:10px;margin:8px 0"><b>${esc(x.member.name)}</b> — TOTAL PAYABLE <b>${money(x.rollup.net)}</b><br><small>Sales ${money(x.rollup.sales)} • Gross ${money(x.rollup.gross)} • TDS ${money(x.rollup.tds)} • ${x.rollup.count} sale(s)</small></div>`).join('')||'<div class="empty">NO DATA</div>'}</div></div>`},
+ settlement:async c=>{const ms=await all('members'),aa=scopedPayouts(ms,await all('payouts')),paid=aa.filter(x=>x.status==='PAID');c.innerHTML=`<div class="card"><div class="section-title"><h3>Monthly Settlement</h3><button class="btn" onclick="exportCSV('payouts')">Export Settlement CSV</button></div><div class="grid three"><div class="card"><small>Total Payouts</small><h2>${paid.length}</h2></div><div class="card"><small>Gross</small><h2>${money(paid.reduce((a,x)=>a+Number(x.gross||0),0))}</h2></div><div class="card"><small>Net Paid</small><h2>${money(paid.reduce((a,x)=>a+Number(x.net||0),0))}</h2></div></div><div class="table-wrap" style="margin-top:16px"><table><thead><tr><th>Payout ID</th><th>Member</th><th>Date</th><th>Gross</th><th>TDS</th><th>Net</th><th>UTR</th></tr></thead><tbody>${paid.map(p=>`<tr><td>${p.payoutId}</td><td>${p.memberName}</td><td>${p.paymentDate}</td><td>${money(p.gross)}</td><td>${money(p.tds)}</td><td>${money(p.net)}</td><td>${esc(p.utr)}</td></tr>`).join('')}</tbody></table></div></div>`},
+ kyc:async c=>{const ms=scopeMembers(await all('members'));c.innerHTML=`<div class="card"><div class="section-title"><h3>KYC / Registration Records</h3></div><div class="table-wrap"><table><thead><tr><th>Member</th><th>Member ID</th><th>Status</th><th>Documents</th><th>Actions</th></tr></thead><tbody>${ms.map(m=>`<tr><td>${esc(m.name)}</td><td>${esc(m.memberId)}</td><td>${m.status}</td><td>${['photo','aadhaarDoc','panDoc','cheque','signature'].filter(k=>m[k]).length} files</td><td><button class="btn small" onclick="openMemberForm(${m.id})">View/Edit</button><button class="btn small light" onclick="printRegistration(${m.id})">Print KYC PDF</button></td></tr>`).join('')}</tbody></table></div></div>`},
+ export:async c=>{c.innerHTML=`<div class="grid two"><div class="card"><h3>Export Data</h3><p class="settings-note">Exports are automatically limited to your own records and your downline team. Super Admin has full visibility.</p><div class="actions">${['members','sales','ledger','products','payouts','targets','audit'].map(x=>`<button class="btn" onclick="exportCSV('${x}')">${x.toUpperCase()}</button>`).join('')}</div></div><div class="card"><h3>Backup / Restore</h3><p class="settings-note">Backup includes local CRM records and uploaded document data.</p><div class="actions"><button class="btn green" onclick="backupData()">Download Full Backup</button><label class="btn light">Restore Backup<input type="file" accept=".json" hidden onchange="restoreData(this.files[0])"></label></div></div></div>`},
+ audit:async c=>{const a=scopedAudits(await all('members'),await all('audit'));c.innerHTML=`<div class="card"><div class="section-title"><h3>Audit Log</h3></div><div class="table-wrap"><table><thead><tr><th>Date/Time</th><th>User</th><th>Action</th><th>Record</th><th>Details</th><th>IP</th></tr></thead><tbody>${a.sort((x,y)=>y.id-x.id).map(x=>`<tr><td>${x.dateTime}</td><td>${esc(x.user)}</td><td>${esc(x.action)}</td><td>${esc(x.recordId)}</td><td>${esc(x.details)}</td><td>LOCAL</td></tr>`).join('')}</tbody></table></div></div>`},
+ settings:async c=>{const s=await settings();c.innerHTML=`<div class="grid two"><div class="card"><h3>CRM Settings</h3><form id="settingsForm" class="form-grid">
+ ${[['brand','CRM Name',s.brand],['website','Website',s.website],['phone','Phone',s.phone],['address','Business Address',s.address],['adminEmail','Super Admin Email',s.adminEmail],['tds','TDS %',s.tds]].map(([k,l,v])=>`<div class="field"><label>${l}</label><input name="${k}" value="${esc(v)}"></div>`).join('')}
+ <div class="field full"><button class="btn green">Save Settings</button></div></form></div><div class="card"><h3>Offline Software</h3><p class="settings-note">Database: Supabase Online<br>Mode: Cloud authentication + secure database<br>Logo: embedded in this HTML file<br>Online-only functions from the original requirement (OTP email, cloud referral URLs, email notifications) require internet.</p><button class="btn red" onclick="factoryReset()">Factory Reset Local CRM</button></div></div>`;
+ document.getElementById('settingsForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),o=Object.fromEntries(f.entries());o.tds=Number(o.tds||5);o.id=1;await put('settings',o);await audit('SETTINGS_UPDATED');toast('Settings saved')}}
+};
+
+function memberRow(m,aa){return `<tr><td><b>${esc(m.name)}</b><br><small>${esc(m.memberId)} • ${esc(m.mobile)}</small></td><td>${esc(m.role)}</td><td>${esc(memberName(m.parentId,aa))}</td><td>${esc(m.state)} / ${esc(m.district)}</td><td>${m.commissionType==='FIXED'?money(m.commissionValue):esc(m.commissionValue)+'%'}</td><td>${money(m.targetAmount||0)}</td><td><span class="badge ${m.status.toLowerCase()}">${esc(m.status)}</span></td><td><button class="btn small" onclick="openMemberForm(${m.id})">Edit</button> <button class="btn small light" onclick="openMemberIDCard(${m.id})">ID CARD</button> ${isAdmin()&&m.role!=='SUPER ADMIN'?`<button class="btn small red" onclick="toggleMember(${m.id})">${m.status==='ACTIVE'?'Archive':'Activate'}</button>`:''}</td></tr>`}
+function registrationLinkFor(owner,targetRole){
+  const base=location.href.split('?')[0].split('#')[0];
+  const token=btoa(unescape(encodeURIComponent(JSON.stringify({o:String(owner.id),r:targetRole,on:owner.name||owner.full_name||'',om:owner.memberId||owner.member_id||'',or:owner.role||'',t:Date.now()}))));
+  return `${base}?register=${encodeURIComponent(token)}`;
+}
+function linkRowsFor(owner){
+ return (LINK_CHILD_ROLES[owner.role]||[]).map(r=>{const url=registrationLinkFor(owner,r);return `<div class="card" style="padding:12px;margin:8px 0"><b>${esc(ROLE_LABELS[r]||r)}</b><div class="hint" style="word-break:break-all;margin:6px 0">${esc(url)}</div><button class="btn small" onclick="copyText(${JSON.stringify(url)})">COPY LINK</button></div>`}).join('');
+}
+async function copyText(v){try{await navigator.clipboard.writeText(v);toast('REGISTRATION LINK COPIED')}catch(e){prompt('COPY THIS LINK',v)}}
+async function openMyRegistrationLinks(){
+ const owner=state.user;if(!owner)return;
+ document.getElementById('modalTitle').textContent='MY REGISTRATION LINKS';
+ document.getElementById('modalBody').innerHTML=`<div class="card"><p class="settings-note">Each link fixes the role and locks PARENT / UNDER to the link owner.</p>${linkRowsFor(owner)||'<div class="empty">NO REGISTRATION LINKS FOR THIS ROLE</div>'}</div>`;
+ document.getElementById('modal').classList.add('show');
+}
+async function openPublicRegistration(){
+  const raw=new URLSearchParams(location.search).get('register'); if(!raw)return false;
+  try{
+   const decoded=JSON.parse(decodeURIComponent(escape(atob(raw)))),target=String(decoded.r||''),ownerRole=String(decoded.or||'');
+   if(!target||!LINK_CHILD_ROLES[ownerRole]?.includes(target))throw new Error('invalid link');
+   window.__publicRegistration={ownerId:String(decoded.o||''),targetRole:target,ownerName:String(decoded.on||''),ownerMemberId:String(decoded.om||''),ownerRole};
+   document.getElementById('login').style.display='none';
+   document.getElementById('app').style.display='none';
+   let box=document.getElementById('publicRegistration');
+   if(!box){box=document.createElement('div');box.className='login';box.id='publicRegistration';document.body.appendChild(box)}
+   box.style.display='grid';
+   const ownerLabel=window.__publicRegistration.ownerName+(window.__publicRegistration.ownerMemberId?' • '+window.__publicRegistration.ownerMemberId:'');
+   box.innerHTML=`<div class="login-card" style="max-width:980px;width:95%"><div class="brand"><h1>CAREER NEST</h1><p>MEMBER REGISTRATION</p></div>
+    <div class="card" style="margin-bottom:14px"><b>ROLE:</b> ${esc(ROLE_LABELS[target]||target)}<br><b>PARENT / UNDER:</b> ${target==='INDEPENDENT PROJECT MANAGER'?'NO PARENT':esc(ownerLabel+' • '+(ROLE_LABELS[ownerRole]||ownerRole))}</div>
+    ${memberFormHTML({role:target,status:'PENDING',joiningDate:new Date().toISOString().slice(0,10)})}</div>`;
+   const form=box.querySelector('#memberForm'),roleSel=form.querySelector('[name="role"]'),parentSel=form.querySelector('[name="parentId"]'),statusSel=form.querySelector('[name="status"]');
+   roleSel.innerHTML=`<option value="${esc(target)}">${esc(ROLE_LABELS[target]||target)}</option>`;roleSel.value=target;roleSel.disabled=true;
+   parentSel.innerHTML=target==='INDEPENDENT PROJECT MANAGER'?'<option value="">— NO PARENT —</option>':`<option value="${esc(window.__publicRegistration.ownerId)}">${esc(ownerLabel)} • ${esc(ROLE_LABELS[ownerRole]||ownerRole)}</option>`;parentSel.value=window.__publicRegistration.ownerId;parentSel.disabled=true;
+   statusSel.value='PENDING';statusSel.disabled=true;
+   form.onsubmit=e=>{e.preventDefault();toast('ONLINE REGISTRATION FORM OPENED — SUBMISSION BACKEND NEXT');};
+   return true;
+  }catch(e){console.error(e);alert('INVALID REGISTRATION LINK');return false;}
+}
+async function approveMember(id){
+ const m=await get('members',id);
+ if(!m)return toast('MEMBER NOT FOUND');
+ if(m.status!=='PENDING')return toast('MEMBER IS ALREADY ACTIVE');
+ m.status='ACTIVE';
+ await put('members',m);
+ await audit('MEMBER_APPROVED',m.memberId,m.name);
+ toast('MEMBER APPROVED');
+ go(state.page);
+}
+async function rejectMember(id){
+ const m=await get('members',id);
+ if(!m)return toast('MEMBER NOT FOUND');
+ m.status='REJECTED';
+ await put('members',m);
+ await audit('MEMBER_REJECTED',m.memberId,m.name);
+ toast('MEMBER REJECTED');
+ go(state.page);
+}
+function canApproveMember(m){
+ return isAdmin() || (m.parentId===state.user?.id);
+}
+
+let teamTreeMode='pm',teamTreeSelected=null,teamTreeData=[];
+async function openMemberTreeSearch(){
+ const allm=await all('members');
+ teamTreeData=allm;
+ teamTreeSelected=null;
+ document.getElementById('modalTitle').textContent='TEAM TREE';
+ renderTeamTreeSearch();
+ document.getElementById('modal').classList.add('show');
+}
+function renderTeamTreeSearch(){
+ document.getElementById('modalBody').innerHTML=`
+ <div class="tree-search-tabs" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+   <button class="btn ${teamTreeMode==='pm'?'green':''}" onclick="setTeamTreeMode('pm')">1. INDEPENDENT PROJECT MANAGER</button>
+   <button class="btn ${teamTreeMode==='state'?'green':''}" onclick="setTeamTreeMode('state')">2. STATE GROWTH CHANNEL PARTNER</button>
+   <button class="btn ${teamTreeMode==='district'?'green':''}" onclick="setTeamTreeMode('district')">3. DISTRICT ASSOCIATE CHANNEL PARTNER</button>
+   <button class="btn ${teamTreeMode==='agent'?'green':''}" onclick="setTeamTreeMode('agent')">4. INDEPENDENT CAREER ASSOCIATE</button>
+   <button class="btn ${teamTreeMode==='direct'?'green':''}" onclick="setTeamTreeMode('direct')">5. DIRECT NAME SEARCH</button>
+ </div>
+ <div class="hint" style="margin-bottom:10px">${teamTreeModeHint()}</div>
+ <div id="teamTreeSearchArea"></div>
+ <div id="teamTreeResults" style="margin-top:14px"></div>`;
+ renderTeamTreeControls();
+}
+function teamTreeModeHint(){
+ if(teamTreeMode==='pm')return 'SEARCH ONLY INDEPENDENT PROJECT MANAGERS.';
+ if(teamTreeMode==='state')return teamTreeSelected?'SHOWING STATES UNDER THE SELECTED PROJECT MANAGER.':'FIRST SELECT A PROJECT MANAGER.';
+ if(teamTreeMode==='district')return teamTreeSelected?'SHOWING DISTRICTS UNDER THE SELECTED STATE PARTNER.':'FIRST SELECT A STATE GROWTH CHANNEL PARTNER.';
+ if(teamTreeMode==='agent')return teamTreeSelected?'SHOWING AGENTS UNDER THE SELECTED DISTRICT ASSOCIATE.':'FIRST SELECT A DISTRICT ASSOCIATE.';
+ return 'SEARCH ANY MEMBER BY NAME, EMAIL OR MEMBER ID.';
+}
+function setTeamTreeMode(mode){
+ teamTreeMode=mode;teamTreeSelected=null;renderTeamTreeSearch();
+}
+function renderTeamTreeControls(){
+ const area=document.getElementById('teamTreeSearchArea'); if(!area)return;
+ const data=teamTreeData;
+ if(teamTreeMode==='direct'){
+   area.innerHTML='<div class="field"><label>DIRECT NAME SEARCH</label><input id="teamTreeQuery" placeholder="TYPE NAME" oninput="renderTeamTreeResults()"></div>';
+ }else if(teamTreeMode==='pm'){
+   area.innerHTML='<div class="field"><label>PROJECT MANAGER SEARCH</label><input id="teamTreeQuery" placeholder="TYPE PROJECT MANAGER NAME" oninput="renderTeamTreeResults()"></div>';
+ }else{
+   const role=teamTreeMode==='state'?'STATE CHANNEL GROWTH MASTER':teamTreeMode==='district'?'DISTRICT CHANNEL ASSOCIATE':'INDEPENDENT CAREER CONSULTANT';
+   const parentRole=teamTreeMode==='state'?'INDEPENDENT PROJECT MANAGER':teamTreeMode==='district'?'STATE CHANNEL GROWTH MASTER':'DISTRICT CHANNEL ASSOCIATE';
+   const parents=data.filter(m=>m.role===parentRole);
+   area.innerHTML=`<div class="field"><label>SELECT ${esc(ROLE_LABELS[parentRole]||parentRole)}</label>
+   <select id="teamTreeParent" onchange="teamTreeSelected=Number(this.value)||null;renderTeamTreeResults()">
+    <option value="">— SELECT —</option>${parents.map(p=>`<option value="${p.id}" ${teamTreeSelected===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}
+   </select></div>`;
+ }
+ renderTeamTreeResults();
+}
+function renderTeamTreeResults(){
+ const box=document.getElementById('teamTreeResults');if(!box)return;
+ const data=teamTreeData,q=String(document.getElementById('teamTreeQuery')?.value||'').trim().toLowerCase();
+ let rows=[];
+ if(teamTreeMode==='pm'){
+   rows=data.filter(m=>m.role==='INDEPENDENT PROJECT MANAGER' && (!q||String(m.name||'').toLowerCase().includes(q)));
+ }else if(teamTreeMode==='direct'){
+   rows=data.filter(m=>!q||[m.name,m.email,m.memberId].some(v=>String(v||'').toLowerCase().includes(q)));
+ }else{
+   const role=teamTreeMode==='state'?'STATE CHANNEL GROWTH MASTER':teamTreeMode==='district'?'DISTRICT CHANNEL ASSOCIATE':'INDEPENDENT CAREER CONSULTANT';
+   rows=data.filter(m=>m.role===role && (teamTreeSelected==null || Number(m.parentId)===teamTreeSelected));
+ }
+ box.innerHTML=rows.length?rows.map(m=>`<div class="card" style="padding:10px;margin:7px 0;cursor:pointer" onclick="selectTeamTreeNode(${m.id})">
+   <b>${esc(m.name)}</b><span class="badge" style="margin-left:7px">${esc(ROLE_LABELS[m.role]||m.role)}</span>
+   <div class="hint">${esc(m.memberId||'')} • ${esc(m.status||'')}</div><button class="btn small light" onclick="event.stopPropagation();openMemberIDCard(${m.id})">ID CARD</button>
+ </div>`).join(''):'<div class="empty">NO MATCH FOUND</div>';
+}
+async function selectTeamTreeNode(id){
+ teamTreeSelected=id;
+ if(teamTreeMode==='pm'){teamTreeMode='state'}
+ else if(teamTreeMode==='state'){teamTreeMode='district'}
+ else if(teamTreeMode==='district'){teamTreeMode='agent'}
+ else {await showMemberTree(id);return}
+ renderTeamTreeSearch();
+}
+
+async function openSuperAdminTree(){
+ const allm=await all('members');
+ const roots=allm.filter(m=>m.role==='INDEPENDENT PROJECT MANAGER' || m.role==='STATE CHANNEL GROWTH MASTER' || m.role==='DISTRICT CHANNEL ASSOCIATE' || m.role==='INDEPENDENT CAREER CONSULTANT');
+ const rootGroups={
+  'INDEPENDENT PROJECT MANAGER':roots.filter(m=>m.role==='INDEPENDENT PROJECT MANAGER'),
+  'STATE CHANNEL GROWTH MASTER':roots.filter(m=>m.role==='STATE CHANNEL GROWTH MASTER'),
+  'DISTRICT CHANNEL ASSOCIATE':roots.filter(m=>m.role==='DISTRICT CHANNEL ASSOCIATE'),
+  'INDEPENDENT CAREER CONSULTANT':roots.filter(m=>m.role==='INDEPENDENT CAREER CONSULTANT')
+ };
+ document.getElementById('modalTitle').textContent='SUPER ADMIN — COMPLETE TREE';
+ document.getElementById('modalBody').innerHTML=`
+  <div class="field"><label>SEARCH</label><input id="treeGlobalSearch" placeholder="SEARCH PROJECT MANAGER / STATE / DISTRICT / AGENT" oninput="renderGlobalTree()"></div>
+  <div id="globalTreeResults"></div>`;
+ window.__allTreeMembers=allm;
+ renderGlobalTree();
+}
+function renderGlobalTree(){
+ const allm=window.__allTreeMembers||[];
+ const q=String(document.getElementById('treeGlobalSearch')?.value||'').trim().toLowerCase();
+ const filtered=q?allm.filter(m=>[m.name,m.email,m.memberId,m.role].some(v=>String(v||'').toLowerCase().includes(q))):allm;
+ const byParent={};
+ allm.forEach(m=>{if(m.parentId!=null)(byParent[m.parentId]??=[]).push(m)});
+ const roots=allm.filter(m=>['INDEPENDENT PROJECT MANAGER','STATE CHANNEL GROWTH MASTER','DISTRICT CHANNEL ASSOCIATE','INDEPENDENT CAREER CONSULTANT'].includes(m.role));
+ function hasMatch(m){
+   if(!q)return true;
+   if(filtered.some(x=>x.id===m.id))return true;
+   return (byParent[m.id]||[]).some(hasMatch);
+ }
+ function node(m,depth=0){
+   if(!hasMatch(m))return '';
+   const kids=(byParent[m.id]||[]).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+   return `<div style="margin-left:${depth*22}px;margin-top:6px"><div class="card" style="padding:9px">
+    <b>${esc(m.name)}</b> <span class="badge">${esc(ROLE_LABELS[m.role]||m.role)}</span>
+    <div class="hint">${esc(m.memberId||'')} • ${esc(m.status||'')}</div><button class="btn small light" onclick="event.stopPropagation();openMemberIDCard(${m.id})">ID CARD</button>
+   </div>${kids.map(k=>node(k,depth+1)).join('')}</div>`;
+ }
+ document.getElementById('globalTreeResults').innerHTML=roots.filter(hasMatch).map(r=>node(r)).join('')||'<div class="empty">NO TREE MATCH FOUND</div>';
+}
+
+async function filterMembers(){const q=document.getElementById('memberSearch').value.toLowerCase(),aa=await all('members'),ms=scopeMembers(aa).filter(m=>JSON.stringify(m).toLowerCase().includes(q));document.getElementById('memberRows').innerHTML=ms.map(m=>memberRow(m,aa)).join('')}
+function treeHTML(m,aa){const kids=aa.filter(x=>x.parentId===m.id);return `<div class="node"><b>${esc(m.name)}</b><small>${esc(m.role)} • ${esc(m.memberId)}</small></div>${kids.length?`<ul>${kids.map(k=>`<li>${treeHTML(k,aa)}</li>`).join('')}</ul>`:''}`}
+function memberFormHTML(m={}){
+ return `<form id="memberForm" class="form-grid"><input type="hidden" name="id" value="${m.id||''}">
+ <div class="field"><label>Full Name *</label><input name="name" required value="${esc(m.name)}"></div><div class="field"><label>Father's Name</label><input name="father" value="${esc(m.father)}"></div>
+ <div class="field"><label>Date of Birth</label><input name="dob" type="date" value="${esc(m.dob)}"></div><div class="field"><label>Mobile *</label><input name="mobile" required inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)" value="${esc(m.mobile)}"></div>
+ <div class="field"><label>Email *</label><input name="email" type="email" required value="${esc(m.email)}"></div><div class="field"><label>Password</label><input name="password" type="password" value="${esc(m.password)}"></div>
+ <div class="field full"><label>Address</label><textarea name="address">${esc(m.address)}</textarea></div>
+ <div class="field"><label>State</label><input name="state" value="${esc(m.state)}"></div><div class="field"><label>District</label><input name="district" value="${esc(m.district)}"></div>
+ <div class="field"><label>City</label><input name="city" value="${esc(m.city)}"></div><div class="field"><label>PIN Code</label><input name="pin" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)" value="${esc(m.pin)}"></div>
+ <div class="field"><label>PAN</label><input name="pan" inputmode="text" pattern="[A-Za-z]{5}[0-9]{4}[A-Za-z]" maxlength="10" value="${esc(m.pan)}"></div><div class="field"><label>Aadhaar Last 4 Digits</label><input name="aadhaar4" pattern="[0-9]{4}" maxlength="4" value="${esc(m.aadhaar4)}"></div>
+ <div class="field"><label>Account Holder Name</label><input name="accountName" value="${esc(m.accountName)}"></div><div class="field"><label>Bank Name</label><input name="bank" value="${esc(m.bank)}"></div>
+ <div class="field"><label>Bank Account Number</label><input name="accountNo" value="${esc(m.accountNo)}"></div><div class="field"><label>IFSC</label><input name="ifsc" inputmode="text" pattern="[A-Za-z]{4}0[A-Za-z0-9]{6}" maxlength="11" value="${esc(m.ifsc)}"></div>
+ <div class="field"><label>Role *</label><select name="role" id="mfRole" required></select></div><div class="field"><label>Parent / Under</label><select name="parentId" id="mfParent"></select></div>
+ <div class="field"><label>Commission Type</label><select name="commissionType"><option>PERCENTAGE</option><option>FIXED</option></select></div><div class="field"><label>Commission Value</label><input name="commissionValue" type="number" min="0" step="0.01" value="${m.commissionValue||0}"></div><div class="field"><label>Target Amount</label><input name="targetAmount" type="number" min="0" step="0.01" value="${m.targetAmount||0}"></div>
+ <div class="field"><label>Status</label><select name="status"><option>ACTIVE</option><option>PENDING</option><option>REJECTED</option><option>ARCHIVED</option></select></div><div class="field"><label>Joining Date</label><input name="joiningDate" type="date" value="${m.joiningDate||new Date().toISOString().slice(0,10)}"></div>
+ <div class="field full"><div class="hint">KYC DOCUMENTS: PHOTO, SIGNATURE, AADHAAR, PAN AND CANCELLED CHEQUE/BANK PROOF ARE REQUIRED FOR NEW REGISTRATION. MAX 5 MB EACH.</div></div><div class="field"><label>Photo</label><input name="photo" type="file" accept="image/*"></div><div class="field"><label>Signature</label><input name="signature" type="file" accept="image/*"></div>
+ <div class="field"><label>Aadhaar Document</label><input name="aadhaarDoc" type="file" accept="image/*,.pdf"></div><div class="field"><label>PAN Document</label><input name="panDoc" type="file" accept="image/*,.pdf"></div>
+ <div class="field"><label>Cancelled Cheque / Bank Document</label><input name="cheque" type="file" accept="image/*,.pdf"></div>
+ <div class="field full"><label><input type="checkbox" name="declaration" required> मैं घोषणा करता/करती हूँ कि दी गई जानकारी सही है और commission-based Independent Contractor की लागू शर्तें स्वीकार हैं।</label></div>
+ <div class="field full actions"><button class="btn green">Save Member</button><button type="button" class="btn light" onclick="closeModal()">Cancel</button></div></form>`;
+}
+async function setupMemberForm(){
+ const allm=await all('members'),me=state.user,roleSel=document.getElementById('mfRole'),parentSel=document.getElementById('mfParent');
+ const allowed=isAdmin()?ROLES.slice(1):ROLES.slice(Math.min(4,roleRank(me.role)+1));
+ roleSel.innerHTML=allowed.map(r=>`<option value="${r}">${esc(ROLE_LABELS[r]||r)}</option>`).join('');
+ if(!isAdmin()){
+   parentSel.innerHTML=`<option value="${me.id}">${esc(me.name)} • ${esc(ROLE_LABELS[me.role]||me.role)}</option>`;
+   parentSel.value=String(me.id); parentSel.disabled=true;
+ }else{
+   const eligible=scopeMembers(allm).filter(x=>x.id!==me.id && x.role!=='SUPER ADMIN' && x.role!=='INDEPENDENT PROJECT MANAGER');
+   parentSel.innerHTML='<option value="">— NO PARENT —</option>'+eligible.map(x=>`<option value="${x.id}">${esc(x.name)} • ${esc(ROLE_LABELS[x.role]||x.role)}</option>`).join('');
+   parentSel.disabled=false;
+ }
+}
+function applyRoleParentLock(){
+ const r=document.getElementById('mfRole'),p=document.getElementById('mfParent'); if(!r||!p)return;
+ if(r.value==='INDEPENDENT PROJECT MANAGER'){
+   p.value='';p.disabled=true;
+ }else if(!isAdmin()){
+   p.value=String(state.user.id);p.disabled=true;
+ }
+}
+async function openMemberForm(id=null){
+ const old=id?await get('members',id):{role:isAdmin()?'INDEPENDENT PROJECT MANAGER':ROLES[Math.min(4,roleRank(state.user.role)+1)],status:isAdmin()?'ACTIVE':'PENDING',commissionType:'PERCENTAGE',commissionValue:0,joiningDate:new Date().toISOString().slice(0,10)};
+ document.getElementById('modalTitle').textContent=id?'EDIT MEMBER':'ADD MEMBER';
+ document.getElementById('modalBody').innerHTML=memberFormHTML(old);document.getElementById('modal').classList.add('show');
+ await setupMemberForm();
+ const r=document.getElementById('mfRole');r.value=old.role;
+ document.getElementById('mfParent').value=(old.role==='SUPER ADMIN'||old.role==='INDEPENDENT PROJECT MANAGER')?'':(old.parentId||'');
+ applyRoleParentLock();r.onchange=applyRoleParentLock;
+ document.querySelector('[name="status"]').value=old.status||'PENDING';document.querySelector('[name="commissionType"]').value=old.commissionType||'PERCENTAGE';document.querySelector('[name="declaration"]').checked=!!id; document.getElementById('memberForm').onsubmit=saveMember;
+}
+async function saveMember(e){
+ e.preventDefault();
+ const f=new FormData(e.target),aa=await all('members'),id=f.get('id')?Number(f.get('id')):null,old=id?aa.find(x=>x.id===id):null;
+ if(id&&!old)return toast('MEMBER NOT FOUND');
+ const pub=window.__publicRegistration||null;
+ const role=String(f.get('role')||pub?.targetRole||'').trim(),rootRole=role==='SUPER ADMIN'||role==='INDEPENDENT PROJECT MANAGER';
+ let parentId=rootRole?null:(f.get('parentId')?Number(f.get('parentId')):null);
+ if(pub){
+   const owner=aa.find(x=>Number(x.id)===Number(pub.ownerId));
+   if(!owner)return toast('REGISTRATION LINK OWNER NOT FOUND');
+   if(role!==pub.targetRole)return toast('INVALID REGISTRATION ROLE');
+   if(!rootRole)parentId=Number(owner.id);
+ }else if(!isAdmin()){
+   parentId=rootRole?null:state.user.id;
+ }
+ if(pub){
+   if(!rootRole && !aa.some(x=>Number(x.id)===Number(parentId)))return toast('INVALID PARENT / REGISTRATION LINK');
+ }else if(!isAdmin()&&!rootRole&&!scopeMembers(aa).some(x=>x.id===parentId))return toast('INVALID PARENT / SCOPE');
+ if(!pub&&!isAdmin()&&roleRank(role)<=roleRank(state.user.role))return toast('ONLY A LOWER-LEVEL ROLE CAN BE CREATED');
+ if(rootRole)parentId=null;
+ if(parentId!==null&&id!==null&&parentId===id)return toast('INVALID PARENT: A MEMBER CANNOT BE THEIR OWN PARENT');
+ let cursor=parentId,guard=0;while(cursor!=null&&guard++<=aa.length){if(id!==null&&cursor===id)return toast('INVALID HIERARCHY: PARENT CYCLE DETECTED');const pm=aa.find(x=>x.id===cursor);cursor=pm?.parentId??null;}
+ const email=String(f.get('email')||'').trim().toLowerCase(),mobile=String(f.get('mobile')||'').replace(/\D/g,'');
+ if(!email||!email.includes('@'))return toast('VALID EMAIL IS REQUIRED');
+ if(!/^[6-9][0-9]{9}$/.test(mobile))return toast('MOBILE MUST BE EXACTLY 10 DIGITS');
+ if(aa.some(x=>x.id!==id&&String(x.email||'').trim().toLowerCase()===email))return toast('EMAIL ALREADY EXISTS');
+ if(aa.some(x=>x.id!==id&&String(x.mobile||'').replace(/\D/g,'')===mobile))return toast('MOBILE ALREADY EXISTS');
+ const pan=String(f.get('pan')||'').trim().toUpperCase();if(pan&&!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan))return toast('PAN MUST BE 10 CHARACTERS: 5 LETTERS + 4 NUMBERS + 1 LETTER');
+ const pin=String(f.get('pin')||'').replace(/\D/g,'');if(pin&&!/^[0-9]{6}$/.test(pin))return toast('PIN CODE MUST BE EXACTLY 6 DIGITS');
+ const aad=String(f.get('aadhaar4')||'').replace(/\D/g,'');if(aad&&!/^[0-9]{4}$/.test(aad))return toast('AADHAAR LAST 4 MUST BE 4 DIGITS');
+ const ifsc=String(f.get('ifsc')||'').trim().toUpperCase();if(ifsc&&!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc))return toast('IFSC MUST BE 11 CHARACTERS: 4 LETTERS + 0 + 6 ALPHANUMERIC');
+ const requiredDocs=['photo','signature','aadhaarDoc','panDoc','cheque'];
+if(!id){
+ for(const k of requiredDocs){
+  const file=f.get(k);
+  if(!file || !file.size)return toast(k==='aadhaarDoc'?'AADHAAR DOCUMENT IS REQUIRED':k==='panDoc'?'PAN DOCUMENT IS REQUIRED':k==='cheque'?'CANCELLED CHEQUE / BANK DOCUMENT IS REQUIRED':k==='signature'?'SIGNATURE IS REQUIRED':'PHOTO IS REQUIRED');
+  const okTypes=(k==='photo'||k==='signature')?file.type.startsWith('image/'):(file.type.startsWith('image/')||file.type==='application/pdf');
+  if(!okTypes)return toast('INVALID FILE TYPE FOR '+k.toUpperCase());
+  if(file.size>5*1024*1024)return toast(k.toUpperCase()+' MUST BE 5 MB OR LESS');
+ }
+}
+const password=String(f.get('password')||'').trim();if(!id&&password.length<8)return toast('PASSWORD MUST BE AT LEAST 8 CHARACTERS');
+ const type=f.get('commissionType'),val=Number(f.get('commissionValue')||0);if(!Number.isFinite(val)||val<0)return toast('INVALID COMMISSION');
+ if(parentId&&type==='PERCENTAGE'){const p=aa.find(x=>x.id===parentId),pm=rootPM(p,aa);if(pm){const used=allocationForPM(pm.id,aa,id);if(used+val>Number(pm.commissionValue||0)+1e-9)return toast('TEAM COMMISSION ALLOCATION CANNOT EXCEED PM COMMISSION POOL')}}
+ const o=old?{...old}:{memberId:uid('CN'),createdAt:new Date().toISOString()};
+ ['name','father','dob','address','state','district','city','accountName','bank','accountNo','role','status','joiningDate','commissionType'].forEach(k=>o[k]=String(f.get(k)||'').trim().toUpperCase());
+ o.mobile=mobile;o.email=email;o.pan=pan;o.pin=pin;o.aadhaar4=aad;o.ifsc=ifsc;o.targetAmount=Number(f.get('targetAmount')||0);o.password=(password || old?.password || (isAdmin() ? 'Admin@123' : 'ChangeMe@123'));o.parentId=parentId;o.commissionValue=val;
+ for(const k of ['photo','signature','aadhaarDoc','panDoc','cheque']){const file=f.get(k);if(file&&file.size)o[k]=await readFile(file)}
+ if(!id) o.status = pub ? 'PENDING' : (isAdmin() ? 'ACTIVE' : 'PENDING');
+ await put('members',o);
+ await audit(id?'MEMBER_EDITED':'MEMBER_CREATED',o.memberId,o.name);
+ if(pub && !id){
+   window.__publicRegistration=null;
+   const box=document.getElementById('publicRegistration');
+   if(box){
+     box.innerHTML=`<div class="login-card" style="max-width:720px;width:95%"><div class="brand"><h1>CAREER NEST</h1><p>REGISTRATION SUBMITTED</p></div><div class="card"><h3>REGISTRATION RECEIVED</h3><p>Your registration has been submitted successfully and is pending approval.</p><p><b>MEMBER ID:</b> ${esc(o.memberId)}</p></div><button class="btn" onclick="location.href=location.href.split('?')[0]">GO TO LOGIN</button></div>`;
+   }
+   return;
+ }
+ closeModal();
+ toast(id?'MEMBER UPDATED':'MEMBER REGISTERED');
+ if(state.user && state.user.id){ state.user=await get('members',state.user.id); sessionStorage.setItem('cn_user',JSON.stringify(state.user)); }
+ go(state.page);
+}
+async function readFile(f){if(!f)return null;return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(f)})}
+async function toggleMember(id){const m=await get('members',id);m.status=m.status==='ACTIVE'?'ARCHIVED':'ACTIVE';await put('members',m);await audit('MEMBER_STATUS',m.memberId,m.status);go('members')}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+
+async function deleteProduct(id){if(!isAdmin())return;if(!confirm('Delete product?'))return;await del('products',id);await audit('PRODUCT_DELETED',id);go('products')}
+async function openProductForm(id=null){
+ const p=id?await get('products',id):{name:'',sku:'',price:0,gst:0,base:0,description:'',status:'ACTIVE'};
+ document.getElementById('modalTitle').textContent=id?'Edit Product':'Add Product';document.getElementById('modalBody').innerHTML=`<form id="productForm" class="form-grid"><input type="hidden" name="id" value="${p.id||''}">
+ <div class="field"><label>Product Name *</label><input name="name" required value="${esc(p.name)}"></div><div class="field"><label>SKU / Code</label><input name="sku" value="${esc(p.sku)}"></div>
+ <div class="field"><label>Selling Price</label><input name="price" type="number" step=".01" value="${p.price}"></div><div class="field"><label>GST Amount</label><input name="gst" type="number" step=".01" value="${p.gst}"></div>
+ <div class="field"><label>Commission Base Price</label><input name="base" type="number" step=".01" value="${p.base}"></div><div class="field"><label>Status</label><select name="status"><option>ACTIVE</option><option>INACTIVE</option></select></div>
+ <div class="field full"><label>Description</label><textarea name="description">${esc(p.description)}</textarea></div><div class="field full"><button class="btn green">Save</button></div></form>`;
+ document.getElementById('modal').classList.add('show');document.getElementById('productForm').onsubmit=async e=>{e.preventDefault();try{const f=new FormData(e.target),o={name:String(f.get('name')||'').trim(),sku:String(f.get('sku')||'').trim(),price:Number(f.get('price')||0),gst:Number(f.get('gst')||0),base:Number(f.get('base')||0),status:String(f.get('status')||'ACTIVE'),description:String(f.get('description')||'')};const rawId=String(f.get('id')||'').trim();if(rawId)o.id=Number(rawId);await put('products',o);await audit('PRODUCT_SAVED',o.sku);closeModal();toast(id?'PRODUCT UPDATED SUCCESSFULLY':'PRODUCT SAVED SUCCESSFULLY');go('products')}catch(err){console.error(err);toast('PRODUCT SAVE FAILED: '+(err?.message||err))}}
+}
+async function openSaleForm(){
+ const aa=await all('members'),ms=scopeMembers(aa).filter(m=>m.status==='ACTIVE'&&m.role!=='SUPER ADMIN'),ps=await all('products');
+ document.getElementById('modalTitle').textContent='Record Sale';document.getElementById('modalBody').innerHTML=`<form id="saleForm" class="form-grid">
+ <div class="field"><label>Seller</label><select name="sellerId" required>${ms.map(m=>`<option value="${m.id}" ${m.id===state.user.id?'selected':''}>${esc(m.name)} • ${esc(m.memberId)}</option>`).join('')}</select></div>
+ <div class="field"><label>Product</label><select name="productId" required>${ps.filter(p=>p.status==='ACTIVE').map(p=>`<option value="${p.id}">${esc(p.name)} — ${money(p.price)}</option>`).join('')}</select></div>
+ <div class="field"><label>Quantity</label><input name="quantity" type="number" min="1" value="1"></div><div class="field"><label>Sale Date</label><input name="date" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
+ <div class="field"><label>Customer Name</label><input name="customerName" required></div><div class="field"><label>Customer Mobile</label><input name="customerMobile"></div>
+ <div class="field"><label>Customer Email</label><input name="customerEmail" type="email"></div><div class="field full"><label>Customer Address</label><textarea name="customerAddress"></textarea></div>
+ <div class="field full"><button class="btn green">Save Sale & Calculate Commission</button></div></form>`;
+ document.getElementById('modal').classList.add('show');document.getElementById('saleForm').onsubmit=saveSale
+}
+async function saveSale(e){
+ e.preventDefault();const f=new FormData(e.target),aa=await all('members'),p=await get('products',Number(f.get('productId'))),seller=aa.find(m=>m.id===Number(f.get('sellerId'))),q=Number(f.get('quantity')||1),base=Number(p.base||0)*q,total=Number(p.price||0)*q,commission=seller.commissionType==='FIXED'?Number(seller.commissionValue||0)*q:base*Number(seller.commissionValue||0)/100,s=await settings(),tds=commission*Number(s.tds||5)/100;
+ const o={saleId:uid('SALE'),date:f.get('date'),sellerId:seller.id,productId:p.id,productName:p.name,quantity:q,customerName:f.get('customerName'),customerMobile:f.get('customerMobile'),customerEmail:f.get('customerEmail'),customerAddress:f.get('customerAddress'),price:p.price,gst:p.gst,base,total,commission,tds,status:'COMPLETED',totalPayable:Math.max(0,commission-tds)};
+ await put('sales',o);await audit('SALE_CREATED',o.saleId,`${seller.name} / ${p.name}`);closeModal();toast('Sale saved. Commission calculated.');go('sales')
+}
+async function openTargetForm(){
+ const aa=await all('members'),ms=scopeMembers(aa).filter(m=>m.status==='ACTIVE');document.getElementById('modalTitle').textContent='Set Monthly Target';
+ document.getElementById('modalBody').innerHTML=`<form id="targetForm" class="form-grid"><div class="field"><label>Member</label><select name="memberId">${ms.map(m=>`<option value="${m.id}">${esc(m.name)} • ${esc(m.role)}</option>`).join('')}</select></div><div class="field"><label>Month</label><input name="month" type="month" value="${new Date().toISOString().slice(0,7)}"></div><div class="field"><label>Target Amount</label><input name="amount" type="number" min="0"></div><div class="field"><label>Target Units</label><input name="units" type="number" min="0"></div><div class="field full"><button class="btn green">Save Target</button></div></form>`;
+ document.getElementById('modal').classList.add('show');document.getElementById('targetForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);await put('targets',{memberId:Number(f.get('memberId')),month:f.get('month'),amount:Number(f.get('amount')),units:Number(f.get('units')),createdAt:new Date().toISOString()});await audit('TARGET_CREATED');closeModal();go('targets')}
+}
+async function openPayoutForm(){
+ const aa=await all('members'),ms=scopeMembers(aa),ss=(await all('sales')).filter(s=>ms.some(m=>m.id===s.sellerId)&&!s.payoutId);if(!ss.length)return toast('No unpaid commission available');
+ document.getElementById('modalTitle').textContent='Process Payout';document.getElementById('modalBody').innerHTML=`<form id="payoutForm" class="form-grid"><div class="field full"><label>Select Sale / Commission</label><select name="saleId">${ss.map(s=>`<option value="${s.id}">${s.saleId} — ${memberName(s.sellerId,aa)} — Net ${money(s.commission-s.tds)}</option>`).join('')}</select></div>
+ <div class="field"><label>Payment Date</label><input name="paymentDate" type="date" value="${new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Payment Mode</label><select name="mode"><option>Bank Transfer</option><option>UPI</option><option>Cash</option><option>Cheque</option></select></div>
+ <div class="field"><label>UTR / Transaction No.</label><input name="utr"></div><div class="field"><label>Notes</label><input name="notes"></div><div class="field full"><button class="btn green">Mark Paid</button></div></form>`;
+ document.getElementById('modal').classList.add('show');document.getElementById('payoutForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),s=await get('sales',Number(f.get('saleId'))),aa2=await all('members'),m=aa2.find(x=>x.id===s.sellerId),p={payoutId:uid('PAY'),memberId:m.id,memberName:m.name,saleId:s.saleId,gross:s.commission,tds:s.tds,net:s.commission-s.tds,paymentDate:f.get('paymentDate'),mode:f.get('mode'),utr:f.get('utr'),notes:f.get('notes'),status:'PAID'};await put('payouts',p);s.payoutId=p.payoutId;await put('sales',s);await audit('PAYOUT_MARKED_PAID',p.payoutId,m.name);closeModal();toast('Payout marked paid');go('payouts')}
+}
+function authorisedSignatureForMember(m,aa){
+  const pm=rootPM(m,aa);
+  return pm?.signature || '';
+}
+function idCardFrontHTML(m,aa){
+  const sig=authorisedSignatureForMember(m,aa);
+  const photo=m.photo
+    ? `<img class="avatar" src="${m.photo}" alt="Member Photo">`
+    : `<div class="id-photo-placeholder">MEMBER PHOTO</div>`;
+  return `<div class="id-card"><div class="id-front">
+    <img class="logo" src="${LOGO}" alt="CAREER NEST Logo">
+    <div class="card-title">CAREER NEST</div>
+    ${photo}
+    <div class="id-fields">
+      <div class="field"><b>NAME</b><span>${esc(m.name||'')}</span></div>
+      <div class="field"><b>ROLE</b><span>${esc(m.role||'')}</span></div>
+      <div class="field"><b>MEMBER ID</b><span>${esc(m.memberId||'')}</span></div>
+      <div class="field"><b>DATE OF JOINING</b><span>${esc(m.joiningDate||'')}</span></div>
+      <div class="field"><b>MOBILE</b><span>${esc(m.mobile||'')}</span></div>
+      <div class="field"><b>EMAIL</b><span>${esc(m.email||'')}</span></div>
+    </div>
+    <div class="id-sign">
+      <small>AUTHORISED SIGNATURE</small>
+      ${sig?`<img src="${sig}" alt="Authorised Signature">`:''}
+    </div>
+  </div></div>`;
+}
+function idCardBackHTML(){
+  return `<div class="id-card"><div class="id-back">
+    <img class="logo" src="${LOGO}" alt="CAREER NEST Logo">
+    <div class="back-heading">CAREER NEST</div>
+
+    <div class="back-label">WEBSITE</div>
+    <div class="back-value">www.careerdekho.org</div>
+
+    <div class="back-label">PHONE</div>
+    <div class="back-value">9755636437</div>
+
+    <div class="back-label">ADDRESS</div>
+    <div class="back-value">JABALPUR, MADHYA PRADESH, INDIA</div>
+
+    <div class="back-important">IMPORTANT</div>
+    <ul class="back-list">
+      <li>This ID card is the property of Career Dekho Pvt. Ltd.</li>
+      <li>This ID card is non-transferable.</li>
+      <li>If found, please return it to the nearest Career Dekho office.</li>
+      <li>Misuse of this ID card is a punishable offence.</li>
+      <li>Card must be returned when the member association ends.</li>
+    </ul>
+  </div></div>`;
+}
+function idCardPairHTML(m,aa){
+  return `<div class="id-card-pair"><div><div class="id-card-label">FRONT</div>${idCardFrontHTML(m,aa)}</div><div><div class="id-card-label">BACK</div>${idCardBackHTML()}</div></div>`;
+}
+async function renderSelectedIDCard(){
+  const id=Number(document.getElementById('idMemberSelect').value),m=await get('members',id),aa=await all('members');
+  document.getElementById('idPrint').innerHTML=idCardPairHTML(m,aa);
+}
+function printIDPair(){
+  const oldTitle=document.title;
+  document.title='CAREER NEST ID CARD';
+  window.print();
+  setTimeout(()=>document.title=oldTitle,1000);
+}
+async function printRegistration(id){const m=await get('members',id),w=window.open('','_blank');w.document.write(`<html><head><title>KYC Registration</title><style>body{font-family:Arial;padding:25px}h1{color:#0b2447}table{width:100%;border-collapse:collapse}td{padding:7px;border:1px solid #ddd}</style></head><body><img src="${LOGO}" style="width:190px"><h1>CAREER NEST — REGISTRATION / KYC</h1><table>${Object.entries(m).filter(([k])=>!['password','photo','signature','aadhaarDoc','panDoc','cheque'].includes(k)).map(([k,v])=>`<tr><td><b>${esc(k)}</b></td><td>${esc(v)}</td></tr>`).join('')}</table><p>Generated offline: ${new Date().toLocaleString()}</p><script>window.print()<\/script></body></html>`);w.document.close()}
+function download(name,text,type='text/plain'){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+async function exportPaymentCenter(){const aa=await all('members'),ss=await all('sales');let rows=[];if(isAdmin()){for(const pm of aa.filter(m=>m.role==='INDEPENDENT PROJECT MANAGER'))rows.push(...paymentExportRows(pm,aa,ss));}else{for(const ch of aa.filter(m=>Number(m.parentId)===Number(state.user.id)))rows.push(...paymentExportRows(ch,aa,ss));}downloadPaymentCSV(`career-nest-payment-center-${Date.now()}.csv`,rows);await audit('EXPORT_PAYMENT_CENTER','',`ROWS ${rows.length}`)}
+async function exportCSV(storeName){const ms=await all('members');let rows=[];if(storeName==='members'){rows=scopeMembers(ms).map(m=>({...m,memberName:m.name,memberID:m.memberId,parentName:memberName(m.parentId,ms)}));}else if(storeName==='sales'){rows=scopedSales(ms,await all('sales')).map(x=>{const m=ms.find(mm=>Number(mm.id)===Number(x.sellerId));return {...x,sellerName:m?.name||'',sellerMemberID:m?.memberId||'',sellerRole:m?.role||'',totalPayableCommission:netPayable(x)};});}else if(storeName==='ledger'){rows=scopedSales(ms,await all('sales')).map(x=>{const m=ms.find(mm=>Number(mm.id)===Number(x.sellerId));return {date:x.date,saleId:x.saleId,sellerName:m?.name||'',sellerMemberID:m?.memberId||'',sellerRole:m?.role||'',base:x.base,grossCommission:x.commission,tds:x.tds,totalPayableCommission:netPayable(x),status:x.payoutId?'PAID':'UNPAID'};});}else if(storeName==='targets'){rows=scopedTargets(ms,await all('targets')).map(x=>({...x,memberName:memberName(x.memberId,ms),memberID:memberMemberId(x.memberId,ms)}));}else if(storeName==='payouts'){rows=scopedPayouts(ms,await all('payouts')).map(x=>({...x,memberName:x.memberName||memberName(x.memberId,ms),memberID:x.memberId?memberMemberId(x.memberId,ms):'',totalPayableCommission:Number(x.net||0)}));}else if(storeName==='audit'){rows=scopedAudits(ms,await all('audit'));}else if(storeName==='products'){rows=await all('products');}else{rows=await all(storeName);}if(!rows.length)return toast('No data');const keys=[...new Set(rows.flatMap(o=>Object.keys(o)))],csv=[keys.join(','),...rows.map(o=>keys.map(k=>`"${String(o[k]??'').replaceAll('\"','\"\"')}"`).join(','))].join('\n');download(`career-nest-${storeName}-${Date.now()}.csv`,csv,'text/csv');await audit('EXPORT_CSV',storeName,`ROWS ${rows.length}`)}
+async function backupData(){
+ const ms=await all('members'),data={version:2,exportedAt:new Date().toISOString(),scope:isAdmin()?'ALL':'OWN_AND_TEAM'};
+ data.members=scopeMembers(ms);data.products=await all('products');data.sales=scopedSales(ms,await all('sales'));data.targets=scopedTargets(ms,await all('targets'));data.payouts=scopedPayouts(ms,await all('payouts'));data.audit=scopedAudits(ms,await all('audit'));data.settings=isAdmin()?await all('settings'):[];
+ download(`career-nest-backup-${Date.now()}.json`,JSON.stringify(data,null,2),'application/json');await audit('BACKUP_CREATED','',`SCOPE ${data.scope}`)
+}
+async function restoreData(file){if(!file)return;try{const data=JSON.parse(await file.text());if(!confirm('Restore will replace local CRM data. Continue?'))return;for(const s of ['members','products','sales','targets','payouts','audit','settings']){await clear(s);for(const o of (data[s]||[])){const c={...o};delete c.id;await put(s,c)}}toast('Restore completed. Reloading…');setTimeout(()=>location.reload(),800)}catch(e){toast('Invalid backup file')}}
+async function factoryReset(){if(!confirm('DELETE ALL LOCAL CRM DATA? Make a backup first.'))return;for(const s of ['members','products','sales','targets','payouts','audit','settings'])await clear(s);location.reload()}
+(async()=>{
+ try{
+  await initDB();
+  const hasRegistrationLink=new URLSearchParams(location.search).has('register');
+  if(hasRegistrationLink){
+   const handled=await openPublicRegistration();
+   if(handled)return;
+  }
+ }catch(e){alert('Unable to initialize offline database: '+(e?.message||e));}
+})();
+</script>
+</body>
+</html>
