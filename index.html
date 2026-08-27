@@ -675,7 +675,7 @@ async function savePublicMember(e){
     }
     const pan=String(f.get('pan')||'').trim().toUpperCase();if(pan&&!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan))return fail('PAN MUST BE 10 CHARACTERS: 5 LETTERS + 4 NUMBERS + 1 LETTER');
     const pin=String(f.get('pin')||'').replace(/\D/g,'');if(pin&&!/^[0-9]{6}$/.test(pin))return fail('PIN CODE MUST BE EXACTLY 6 DIGITS');
-    const aad=String(f.get('aadhaar4')||'').replace(/\D/g,'');if(aad&&!/^[0-9]{4}$/.test(aad))return fail('AADHAAR LAST 4 MUST BE 4 DIGITS');
+    const aadhaar4=String(f.get('aadhaar4')||'').replace(/\D/g,'');if(aadhaar4&&!/^[0-9]{4}$/.test(aadhaar4))return fail('AADHAAR LAST 4 MUST BE 4 DIGITS');
     const ifsc=String(f.get('ifsc')||'').trim().toUpperCase();if(ifsc&&!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc))return fail('IFSC MUST BE 11 CHARACTERS: 4 LETTERS + 0 + 6 ALPHANUMERIC');
 
     // Create/verify the Auth identity first. The DB RPC never trusts a role or parent from the browser.
@@ -702,7 +702,7 @@ async function savePublicMember(e){
     const payload={
       member_id:uid('CN'),full_name:name,name,father:String(f.get('father')||'').trim().toUpperCase(),father_name:String(f.get('father')||'').trim().toUpperCase(),
       dob:String(f.get('dob')||'').trim(),mobile,email,address:String(f.get('address')||'').trim().toUpperCase(),
-      state:String(f.get('state')||'').trim().toUpperCase(),state_name:String(f.get('state')||'').trim().toUpperCase(),district:String(f.get('district')||'').trim().toUpperCase(),district_name:String(f.get('district')||'').trim().toUpperCase(),city:String(f.get('city')||'').trim().toUpperCase(),pin,pan,aadhaar4,
+      state:String(f.get('state')||'').trim().toUpperCase(),state_name:String(f.get('state')||'').trim().toUpperCase(),district:String(f.get('district')||'').trim().toUpperCase(),district_name:String(f.get('district')||'').trim().toUpperCase(),city:String(f.get('city')||'').trim().toUpperCase(),pin,pan,aadhaar4:aadhaar4,
       account_name:String(f.get('accountName')||'').trim().toUpperCase(),accountName:String(f.get('accountName')||'').trim().toUpperCase(),bank:String(f.get('bank')||'').trim().toUpperCase(),account_no:String(f.get('accountNo')||'').trim(),accountNo:String(f.get('accountNo')||'').trim(),ifsc,
       commission_type:String(f.get('commissionType')||'PERCENTAGE').trim().toUpperCase(),commissionType:String(f.get('commissionType')||'PERCENTAGE').trim().toUpperCase(),commission_value:Number(f.get('commissionValue')||0),commissionValue:Number(f.get('commissionValue')||0),target_amount:Number(f.get('targetAmount')||0),targetAmount:Number(f.get('targetAmount')||0),
       joining_date:String(f.get('joiningDate')||new Date().toISOString().slice(0,10)),joiningDate:String(f.get('joiningDate')||new Date().toISOString().slice(0,10)),status:'PENDING',auth_user_id:authUser.id,...docs
@@ -995,7 +995,7 @@ async function saveMember(e){
  if(aa.some(x=>x.id!==id&&String(x.mobile||'').replace(/\D/g,'')===mobile))return toast('MOBILE ALREADY EXISTS');
  const pan=String(f.get('pan')||'').trim().toUpperCase();if(pan&&!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan))return toast('PAN MUST BE 10 CHARACTERS: 5 LETTERS + 4 NUMBERS + 1 LETTER');
  const pin=String(f.get('pin')||'').replace(/\D/g,'');if(pin&&!/^[0-9]{6}$/.test(pin))return toast('PIN CODE MUST BE EXACTLY 6 DIGITS');
- const aad=String(f.get('aadhaar4')||'').replace(/\D/g,'');if(aad&&!/^[0-9]{4}$/.test(aad))return toast('AADHAAR LAST 4 MUST BE 4 DIGITS');
+ const aadhaar4=String(f.get('aadhaar4')||'').replace(/\D/g,'');if(aadhaar4&&!/^[0-9]{4}$/.test(aadhaar4))return toast('AADHAAR LAST 4 MUST BE 4 DIGITS');
  const ifsc=String(f.get('ifsc')||'').trim().toUpperCase();if(ifsc&&!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc))return toast('IFSC MUST BE 11 CHARACTERS: 4 LETTERS + 0 + 6 ALPHANUMERIC');
  const requiredDocs=['photo','signature','aadhaarDoc','panDoc','cheque'];
 if(!id){
@@ -1012,7 +1012,7 @@ const password=String(f.get('password')||'').trim();if(!id&&password.length<8)re
  if(parentId&&type==='PERCENTAGE'){const p=aa.find(x=>x.id===parentId),pm=rootPM(p,aa);if(pm){const used=allocationForPM(pm.id,aa,id);if(used+val>Number(pm.commissionValue||0)+1e-9)return toast('TEAM COMMISSION ALLOCATION CANNOT EXCEED PM COMMISSION POOL')}}
  const o=old?{...old}:{memberId:uid('CN'),createdAt:new Date().toISOString()};
  ['name','father','dob','address','state','district','city','accountName','bank','accountNo','role','status','joiningDate','commissionType'].forEach(k=>o[k]=String(f.get(k)||'').trim().toUpperCase());
- o.mobile=mobile;o.email=email;o.pan=pan;o.pin=pin;o.aadhaar4=aad;o.ifsc=ifsc;o.targetAmount=Number(f.get('targetAmount')||0);o.password=(password || old?.password || (isAdmin() ? 'Admin@123' : 'ChangeMe@123'));o.parentId=parentId;o.commissionValue=val;
+ o.mobile=mobile;o.email=email;o.pan=pan;o.pin=pin;o.aadhaar4=aadhaar4;o.ifsc=ifsc;o.targetAmount=Number(f.get('targetAmount')||0);o.password=(password || old?.password || (isAdmin() ? 'Admin@123' : 'ChangeMe@123'));o.parentId=parentId;o.commissionValue=val;
  for(const k of ['photo','signature','aadhaarDoc','panDoc','cheque']){const file=f.get(k);if(file&&file.size)o[k]=await readFile(file)}
  if(!id) o.status = pub ? 'PENDING' : (isAdmin() ? 'ACTIVE' : 'PENDING');
  await put('members',o);
