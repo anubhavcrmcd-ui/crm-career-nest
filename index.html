@@ -642,8 +642,14 @@ async function getPublicRegistrationContext(ownerId,targetRole){
 
 async function savePublicMember(e){
   e.preventDefault();
-  const f=new FormData(e.target),pub=window.__publicRegistration;
-  if(!pub)return toast('INVALID REGISTRATION SESSION');
+  const form=e.target;
+  if(window.__publicSaving)return;
+  window.__publicSaving=true;
+  const submitBtn=form.querySelector('button[type=submit],button:not([type])');
+  const oldBtnText=submitBtn?submitBtn.textContent:'';
+  if(submitBtn){submitBtn.disabled=true;submitBtn.textContent='SUBMITTING…';}
+  const f=new FormData(form),pub=window.__publicRegistration;
+  if(!pub){window.__publicSaving=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=oldBtnText;}return toast('INVALID REGISTRATION SESSION');}
   const name=String(f.get('name')||'').trim().toUpperCase();
   const email=String(f.get('email')||'').trim().toLowerCase();
   const password=String(f.get('password')||'').trim();
@@ -667,11 +673,15 @@ async function savePublicMember(e){
   const ifsc=String(f.get('ifsc')||'').trim().toUpperCase();if(ifsc&&!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc))return toast('IFSC MUST BE 11 CHARACTERS: 4 LETTERS + 0 + 6 ALPHANUMERIC');
   const {data:authData,error:authError}=await window.careerNestSupabase.auth.signUp({email,password});
   if(authError){
+    window.__publicSaving=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=oldBtnText;}
     const msg=String(authError.message||'').toLowerCase();
     return toast(msg.includes('already')||msg.includes('registered')?'EMAIL ALREADY REGISTERED':authError.message);
   }
   const authUser=authData?.user;
-  if(!authUser)return toast('AUTHENTICATION USER WAS NOT CREATED');
+  if(!authUser){
+    window.__publicSaving=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=oldBtnText;}
+    return toast('AUTHENTICATION USER WAS NOT CREATED');
+  }
   const docs={};
   for(const k of requiredDocs){const file=f.get(k);if(file&&file.size)docs[k]=await readFile(file);}
   const payload={
@@ -689,7 +699,7 @@ async function savePublicMember(e){
     ...docs
   };
   const {data:newMember,error:insertError}=await window.careerNestSupabase.rpc('public_register_member',{p_owner_id:String(pub.ownerId),p_target_role:String(pub.targetRole),p_auth_user_id:String(authUser.id),p_payload:payload});
-  if(insertError){try{await window.careerNestSupabase.auth.signOut();}catch(_){}return toast(insertError.message||'REGISTRATION SUBMISSION FAILED');}
+  if(insertError){try{await window.careerNestSupabase.auth.signOut();}catch(_){}window.__publicSaving=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=oldBtnText;}return toast(insertError.message||'REGISTRATION SUBMISSION FAILED');}
   try{await window.careerNestSupabase.auth.signOut();}catch(_){}
   window.__publicRegistration=null;
   const box=document.getElementById('publicRegistration');
