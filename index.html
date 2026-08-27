@@ -731,11 +731,14 @@ function decodeRegistrationToken(raw){
 async function openPublicRegistration(){
   const raw=new URLSearchParams(location.search).get('register'); if(!raw)return false;
   try{
-    const decoded=decodeRegistrationToken(raw),target=String(decoded.r||''),ownerRole=String(decoded.or||'');
-    if(!target||!LINK_CHILD_ROLES[ownerRole]?.includes(target))throw new Error('INVALID REGISTRATION LINK');
+    const decoded=decodeRegistrationToken(raw),target=String(decoded.r||'');
+    if(!target)throw new Error('INVALID REGISTRATION LINK');
     if(!window.careerNestSupabase)throw new Error('SUPABASE IS NOT AVAILABLE');
+    // Do not validate LINK_CHILD_ROLES locally: the token may contain a role
+    // representation that differs from the database role label. Supabase RPC
+    // is the authoritative owner/role validator.
     const ctx=await getPublicRegistrationContext(decoded.o,target);
-    window.__publicRegistration={ownerId:String(ctx.owner_id||decoded.o||''),targetRole:target,ownerName:String(ctx.owner_name||decoded.on||''),ownerMemberId:String(ctx.owner_member_id||decoded.om||''),ownerRole:String(ctx.owner_role||ownerRole)};
+    window.__publicRegistration={ownerId:String(ctx.owner_id||decoded.o||''),targetRole:target,ownerName:String(ctx.owner_name||decoded.on||''),ownerMemberId:String(ctx.owner_member_id||decoded.om||''),ownerRole:String(ctx.owner_role||decoded.or||'')};
     document.getElementById('login').style.display='none';document.getElementById('app').style.display='none';
     let box=document.getElementById('publicRegistration');if(!box){box=document.createElement('div');box.className='login';box.id='publicRegistration';document.body.appendChild(box)}
     box.style.display='grid';
