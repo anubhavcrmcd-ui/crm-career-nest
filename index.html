@@ -718,10 +718,20 @@ async function savePublicMember(e){
   if(box){box.innerHTML=`<div class="login-card" style="max-width:720px;width:95%"><div class="brand"><h1>CAREER NEST</h1><p>REGISTRATION SUBMITTED</p></div><div class="card"><h3>REGISTRATION RECEIVED</h3><p>Your registration has been submitted successfully and is pending approval.</p><p><b>MEMBER ID:</b> ${esc(newMember?.member_id||newMember?.memberId||payload.member_id)}</p><p class="hint">Your login will be available after the registration is approved and email verification requirements are completed.</p></div><button class="btn" onclick="location.href=location.href.split('?')[0]">GO TO LOGIN</button></div>`;}
 }
 
+function decodeRegistrationToken(raw){
+  let s=String(raw||'').trim();
+  // URLSearchParams can turn a literal '+' in a manually-copied base64 token into a space.
+  s=s.replace(/ /g,'+').replace(/-/g,'+').replace(/_/g,'/');
+  while(s.length%4)s+='=';
+  const bin=atob(s);
+  const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
+  return JSON.parse(new TextDecoder('utf-8',{fatal:false}).decode(bytes));
+}
+
 async function openPublicRegistration(){
   const raw=new URLSearchParams(location.search).get('register'); if(!raw)return false;
   try{
-    const decoded=JSON.parse(decodeURIComponent(escape(atob(raw)))),target=String(decoded.r||''),ownerRole=String(decoded.or||'');
+    const decoded=decodeRegistrationToken(raw),target=String(decoded.r||''),ownerRole=String(decoded.or||'');
     if(!target||!LINK_CHILD_ROLES[ownerRole]?.includes(target))throw new Error('INVALID REGISTRATION LINK');
     if(!window.careerNestSupabase)throw new Error('SUPABASE IS NOT AVAILABLE');
     const ctx=await getPublicRegistrationContext(decoded.o,target);
