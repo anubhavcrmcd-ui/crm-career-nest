@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CAREER NEST CRM — STEP 2 Members</title>
+<title>CAREER NEST CRM — V24 Online Registration</title>
 <style>
 :root{--nav:#0b2447;--nav2:#123b6d;--green:#4b8f2c;--ink:#172033;--muted:#667085;--bg:#f4f7fb;--card:#fff;--line:#e5e7eb;--danger:#c62828;--shadow:0 8px 28px rgba(16,24,40,.08)}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -268,6 +268,7 @@ input:not([type="email"]):not([type="password"]), textarea, select {
 #memberForm input[name="mobile"],#memberForm input[name="pin"],#memberForm input[name="aadhaar4"]{text-transform:none}
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// V24: public registration uses Supabase RPCs; no IndexedDB is initialized on registration links.
 window.CAREER_NEST_SUPABASE_URL = "https://muonxagfjtjokbksnyqa.supabase.co";
 window.CAREER_NEST_SUPABASE_KEY = "sb_publishable_CYw3LeMYmt9x3d8k3vecKw_Q2kvO6Uv";
 window.careerNestSupabase = window.supabase.createClient(window.CAREER_NEST_SUPABASE_URL, window.CAREER_NEST_SUPABASE_KEY);
@@ -572,7 +573,17 @@ tree:async c=>{
  const render=()=>{const q=(document.getElementById('onlineTreeSearch')?.value||'').toUpperCase(),r=roleFilter();const arr=(rows||[]).filter(m=>(!r||roleOf(m)===r)&&(!q||[nameOf(m),idOf(m),m.email,m.mobile].some(v=>String(v||'').toUpperCase().includes(q))));document.getElementById('onlineTreeRows').innerHTML=arr.map(m=>{const p=byId.get(String(m.parent_member_id));return `<div class=\"card\" style=\"padding:12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center\"><div><b>${esc(nameOf(m))}</b><br><small>${esc(roleOf(m))} • ${esc(idOf(m))} • ${esc(m.status||'—')}</small><br><small>UNDER: ${esc(p?nameOf(p):'TOP LEVEL')}</small></div></div>`}).join('')||'<div class=\"empty\">NO MEMBERS FOUND</div>'};
  c.innerHTML=`<div class=\"card\"><div class=\"section-title\"><div><h3>TEAM TREE</h3><div class=\"hint\">LIVE SUPABASE TEAM TREE — YOUR ALLOWED SCOPE</div></div></div><div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px\"><select id=\"onlineTreeRole\"><option value=\"\">ALL ROLES</option><option value=\"INDEPENDENT_PROJECT_MANAGER\">PROJECT MANAGER</option><option value=\"STATE_CHANNEL_GROWTH_MASTER\">STATE CHANNEL GROWTH MASTER</option><option value=\"DISTRICT_CHANNEL_ASSOCIATE\">DISTRICT CHANNEL ASSOCIATE</option><option value=\"INDEPENDENT_CAREER_CONSULTANT\">CAREER CONSULTANT</option></select><input id=\"onlineTreeSearch\" placeholder=\"SEARCH NAME OR MEMBER ID\" style=\"flex:1;min-width:220px\"></div><div id=\"onlineTreeRows\"></div></div>`;document.getElementById('onlineTreeRole').onchange=render;document.getElementById('onlineTreeSearch').oninput=render;render();
 },
-registration:async c=>{const owner=state.user;c.innerHTML=`<div class="card"><div class="section-title"><div><h3>NEW REGISTRATION</h3><div class="hint">ONLINE REGISTRATION LINKS AND PENDING REGISTRATIONS</div></div><button class="btn green" onclick="openMemberForm()">+ NEW REGISTRATION</button></div><div class="card" style="padding:14px"><h3>MY REGISTRATION LINKS</h3>${owner?linkRowsFor(owner):'<div class="empty">LOGIN REQUIRED</div>'}</div><div class="card" style="margin-top:16px"><h3>PENDING REGISTRATIONS</h3><div id="pendingRegistrationRows"><div class="empty">ONLINE PENDING REGISTRATION SYNC WILL APPEAR HERE</div></div></div></div>`;},
+registration:async c=>{
+  const owner=state.user;
+  let pending=[];
+  if(window.careerNestSupabase&&owner){
+    let q=window.careerNestSupabase.from('members').select('*, roles:role_id(code)').eq('status','PENDING').order('created_at',{ascending:false});
+    if(!isAdmin())q=q.eq('parent_member_id',owner.id);
+    const {data,error}=await q;if(!error)pending=data||[];else console.error(error);
+  }
+  const roleOf=m=>m.roles?.code||'MEMBER',nameOf=m=>m.full_name||m.name||'—',idOf=m=>m.member_id||'—';
+  c.innerHTML=`<div class="card"><div class="section-title"><div><h3>NEW REGISTRATION</h3><div class="hint">ONLINE REGISTRATION LINKS AND PENDING REGISTRATIONS</div></div><button class="btn green" onclick="openMemberForm()">+ NEW REGISTRATION</button></div><div class="card" style="padding:14px"><h3>MY REGISTRATION LINKS</h3>${owner?linkRowsFor(owner):'<div class="empty">LOGIN REQUIRED</div>'}</div><div class="card" style="margin-top:16px"><h3>PENDING REGISTRATIONS</h3>${pending.length?`<div class="table-wrap"><table><thead><tr><th>NAME</th><th>ROLE</th><th>MEMBER ID</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody>${pending.map(m=>`<tr><td>${esc(nameOf(m))}</td><td>${esc(roleOf(m))}</td><td>${esc(idOf(m))}</td><td>PENDING</td><td><button class="btn small green" onclick="approveMember('${String(m.id)}')">APPROVE</button> <button class="btn small red" onclick="rejectMember('${String(m.id)}')">REJECT</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">NO PENDING REGISTRATIONS</div>'}</div></div>`;
+},
   idcard:async c=>{const aa=await all('members'),ms=scopeMembers(aa),me=ms.find(m=>Number(m.id)===Number(state.user.id))||ms[0];c.innerHTML=`<div class="card"><div class="section-title"><h3>MEMBER ID CARDS</h3><button class="btn green" onclick="printIDPair()">PRINT ID CARD</button></div><div class="field"><label>SELECT MEMBER</label><select id="idMemberSelect" onchange="renderSelectedIDCard()">${ms.map(m=>`<option value="${m.id}" ${me&&Number(m.id)===Number(me.id)?'selected':''}>${esc(m.name)} • ${esc(m.memberId)}</option>`).join('')}</select></div><div id="idPrint" style="margin-top:16px"></div></div>`;if(ms.length)await renderSelectedIDCard()},
  products:async c=>{const ps=await all('products');c.innerHTML=`<div class="card"><div class="section-title"><h3>Products (${ps.length})</h3><button class="btn green" onclick="openProductForm()">+ Add Product</button></div><div class="table-wrap"><table><thead><tr><th>Name</th><th>SKU</th><th>Selling Price</th><th>GST</th><th>Commission Base</th><th>Status</th><th></th></tr></thead><tbody>${ps.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.sku)}</td><td>${money(p.price)}</td><td>${money(p.gst)}</td><td>${money(p.base)}</td><td>${esc(p.status)}</td><td><button class="btn small" onclick="openProductForm(${p.id})">Edit</button> <button class="btn small red" onclick="deleteProduct(${p.id})">Delete</button></td></tr>`).join('')}</tbody></table></div></div>`},
  sales:async c=>{const aa=await all('members'),ms=scopeMembers(aa),ss=(await all('sales')).filter(x=>ms.some(m=>m.id===x.sellerId));c.innerHTML=`<div class="card"><div class="section-title"><h3>Sales (${ss.length})</h3><button class="btn green" onclick="openSaleForm()">+ Record Sale</button></div><div class="table-wrap"><table><thead><tr><th>Sale ID / Date</th><th>SELLER NAME</th><th>MEMBER ID</th><th>ID CARD</th><th>Customer</th><th>Product</th><th>Total</th><th>Gross Commission</th><th>TDS</th><th>NET PAYABLE COMMISSION</th><th>Status</th></tr></thead><tbody>${ss.sort((a,b)=>b.id-a.id).map(x=>`<tr><td>${esc(x.saleId)}<br><small>${esc(x.date)}</small></td><td><b>${esc(memberName(x.sellerId,aa))}</b></td><td>${esc(memberMemberId(x.sellerId,aa))}</td><td><button class="btn small light" onclick="openMemberIDCard(${x.sellerId})">VIEW ID CARD</button></td><td>${esc(x.customerName)}<br>${esc(x.customerMobile)}</td><td>${esc(x.productName)} × ${x.quantity}</td><td>${money(x.total)}</td><td>${money(x.commission)}</td><td>${money(x.tds)}</td><td><b>${money(netPayable(x))}</b></td><td><span class="badge active">${esc(x.status)}</span></td></tr>`).join('')}</tbody></table></div></div>`},
@@ -606,55 +617,125 @@ function registrationLinkFor(owner,targetRole){
 function linkRowsFor(owner){
  return (LINK_CHILD_ROLES[owner.role]||[]).map(r=>{const url=registrationLinkFor(owner,r);return `<div class="card" style="padding:12px;margin:8px 0"><b>${esc(ROLE_LABELS[r]||r)}</b><div class="hint" style="word-break:break-all;margin:6px 0">${esc(url)}</div><button class="btn small" onclick="copyText(${JSON.stringify(url)})">COPY LINK</button></div>`}).join('');
 }
-async function copyText(v){try{await navigator.clipboard.writeText(v);toast('REGISTRATION LINK COPIED')}catch(e){prompt('COPY THIS LINK',v)}}
+async function copyText(v){
+  try{
+    if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(v);toast('REGISTRATION LINK COPIED');return;}
+  }catch(_){}
+  try{
+    const ta=document.createElement('textarea');ta.value=v;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.focus();ta.select();const ok=document.execCommand('copy');ta.remove();if(ok){toast('REGISTRATION LINK COPIED');return;}
+  }catch(_){}
+  const box=document.createElement('div');box.className='card';box.style.cssText='position:fixed;inset:20px;z-index:200;max-width:900px;margin:auto;height:max-content;box-shadow:0 20px 60px #0005';box.innerHTML='<h3>COPY REGISTRATION LINK</h3><textarea style="min-height:110px"></textarea><div class="actions" style="margin-top:10px"><button class="btn green" id="manualCopyBtn">SELECT LINK</button><button class="btn light" id="manualCloseBtn">CLOSE</button></div>';document.body.appendChild(box);const t=box.querySelector('textarea');t.value=v;t.focus();t.select();box.querySelector('#manualCopyBtn').onclick=()=>{t.focus();t.select();toast('LINK SELECTED — PRESS CTRL+C');};box.querySelector('#manualCloseBtn').onclick=()=>box.remove();
+}
 async function openMyRegistrationLinks(){
  const owner=state.user;if(!owner)return;
  document.getElementById('modalTitle').textContent='MY REGISTRATION LINKS';
  document.getElementById('modalBody').innerHTML=`<div class="card"><p class="settings-note">Each link fixes the role and locks PARENT / UNDER to the link owner.</p>${linkRowsFor(owner)||'<div class="empty">NO REGISTRATION LINKS FOR THIS ROLE</div>'}</div>`;
  document.getElementById('modal').classList.add('show');
 }
+async function getPublicRegistrationContext(ownerId,targetRole){
+  const {data,error}=await window.careerNestSupabase.rpc('public_get_registration_context',{p_owner_id:Number(ownerId),p_target_role:String(targetRole)});
+  if(error)throw new Error(error.message||'REGISTRATION CONTEXT FAILED');
+  if(!data)throw new Error('REGISTRATION LINK OWNER NOT FOUND');
+  return data;
+}
+
+async function savePublicMember(e){
+  e.preventDefault();
+  const f=new FormData(e.target),pub=window.__publicRegistration;
+  if(!pub)return toast('INVALID REGISTRATION SESSION');
+  const name=String(f.get('name')||'').trim().toUpperCase();
+  const email=String(f.get('email')||'').trim().toLowerCase();
+  const password=String(f.get('password')||'').trim();
+  const mobile=String(f.get('mobile')||'').replace(/\D/g,'');
+  if(!name)return toast('FULL NAME IS REQUIRED');
+  if(!email||!email.includes('@'))return toast('VALID EMAIL IS REQUIRED');
+  if(!/^[6-9][0-9]{9}$/.test(mobile))return toast('MOBILE MUST BE EXACTLY 10 DIGITS');
+  if(password.length<8)return toast('PASSWORD MUST BE AT LEAST 8 CHARACTERS');
+  if(!f.get('declaration'))return toast('DECLARATION IS REQUIRED');
+  const requiredDocs=['photo','signature','aadhaarDoc','panDoc','cheque'];
+  for(const k of requiredDocs){
+    const file=f.get(k);
+    if(!file||!file.size)return toast(k==='aadhaarDoc'?'AADHAAR DOCUMENT IS REQUIRED':k==='panDoc'?'PAN DOCUMENT IS REQUIRED':k==='cheque'?'CANCELLED CHEQUE / BANK DOCUMENT IS REQUIRED':k==='signature'?'SIGNATURE IS REQUIRED':'PHOTO IS REQUIRED');
+    const ok=(k==='photo'||k==='signature')?file.type.startsWith('image/'):(file.type.startsWith('image/')||file.type==='application/pdf');
+    if(!ok)return toast('INVALID FILE TYPE FOR '+k.toUpperCase());
+    if(file.size>5*1024*1024)return toast(k.toUpperCase()+' MUST BE 5 MB OR LESS');
+  }
+  const pan=String(f.get('pan')||'').trim().toUpperCase();if(pan&&!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan))return toast('PAN MUST BE 10 CHARACTERS: 5 LETTERS + 4 NUMBERS + 1 LETTER');
+  const pin=String(f.get('pin')||'').replace(/\D/g,'');if(pin&&!/^[0-9]{6}$/.test(pin))return toast('PIN CODE MUST BE EXACTLY 6 DIGITS');
+  const aad=String(f.get('aadhaar4')||'').replace(/\D/g,'');if(aad&&!/^[0-9]{4}$/.test(aad))return toast('AADHAAR LAST 4 MUST BE 4 DIGITS');
+  const ifsc=String(f.get('ifsc')||'').trim().toUpperCase();if(ifsc&&!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc))return toast('IFSC MUST BE 11 CHARACTERS: 4 LETTERS + 0 + 6 ALPHANUMERIC');
+  const {data:authData,error:authError}=await window.careerNestSupabase.auth.signUp({email,password});
+  if(authError){
+    const msg=String(authError.message||'').toLowerCase();
+    return toast(msg.includes('already')||msg.includes('registered')?'EMAIL ALREADY REGISTERED':authError.message);
+  }
+  const authUser=authData?.user;
+  if(!authUser)return toast('AUTHENTICATION USER WAS NOT CREATED');
+  const docs={};
+  for(const k of requiredDocs){const file=f.get(k);if(file&&file.size)docs[k]=await readFile(file);}
+  const payload={
+    member_id:uid('CN'),full_name:name,name,father:String(f.get('father')||'').trim().toUpperCase(),father_name:String(f.get('father')||'').trim().toUpperCase(),
+    dob:String(f.get('dob')||'').trim(),mobile,email,address:String(f.get('address')||'').trim().toUpperCase(),
+    state:String(f.get('state')||'').trim().toUpperCase(),state_name:String(f.get('state')||'').trim().toUpperCase(),
+    district:String(f.get('district')||'').trim().toUpperCase(),district_name:String(f.get('district')||'').trim().toUpperCase(),city:String(f.get('city')||'').trim().toUpperCase(),pin,pan,aadhaar4,
+    account_name:String(f.get('accountName')||'').trim().toUpperCase(),accountName:String(f.get('accountName')||'').trim().toUpperCase(),
+    bank:String(f.get('bank')||'').trim().toUpperCase(),account_no:String(f.get('accountNo')||'').trim(),accountNo:String(f.get('accountNo')||'').trim(),ifsc,
+    commission_type:String(f.get('commissionType')||'PERCENTAGE').trim().toUpperCase(),commissionType:String(f.get('commissionType')||'PERCENTAGE').trim().toUpperCase(),
+    commission_value:Number(f.get('commissionValue')||0),commissionValue:Number(f.get('commissionValue')||0),
+    target_amount:Number(f.get('targetAmount')||0),targetAmount:Number(f.get('targetAmount')||0),
+    joining_date:String(f.get('joiningDate')||new Date().toISOString().slice(0,10)),joiningDate:String(f.get('joiningDate')||new Date().toISOString().slice(0,10)),
+    status:'PENDING',auth_user_id:authUser.id,
+    ...docs
+  };
+  const {data:newMember,error:insertError}=await window.careerNestSupabase.rpc('public_register_member',{p_owner_id:Number(pub.ownerId),p_target_role:String(pub.targetRole),p_auth_user_id:String(authUser.id),p_payload:payload});
+  if(insertError){try{await window.careerNestSupabase.auth.signOut();}catch(_){}return toast(insertError.message||'REGISTRATION SUBMISSION FAILED');}
+  try{await window.careerNestSupabase.auth.signOut();}catch(_){}
+  window.__publicRegistration=null;
+  const box=document.getElementById('publicRegistration');
+  if(box){box.innerHTML=`<div class="login-card" style="max-width:720px;width:95%"><div class="brand"><h1>CAREER NEST</h1><p>REGISTRATION SUBMITTED</p></div><div class="card"><h3>REGISTRATION RECEIVED</h3><p>Your registration has been submitted successfully and is pending approval.</p><p><b>MEMBER ID:</b> ${esc(newMember?.member_id||newMember?.memberId||payload.member_id)}</p><p class="hint">Your login will be available after the registration is approved and email verification requirements are completed.</p></div><button class="btn" onclick="location.href=location.href.split('?')[0]">GO TO LOGIN</button></div>`;}
+}
+
 async function openPublicRegistration(){
   const raw=new URLSearchParams(location.search).get('register'); if(!raw)return false;
   try{
-   const decoded=JSON.parse(decodeURIComponent(escape(atob(raw)))),target=String(decoded.r||''),ownerRole=String(decoded.or||'');
-   if(!target||!LINK_CHILD_ROLES[ownerRole]?.includes(target))throw new Error('invalid link');
-   window.__publicRegistration={ownerId:String(decoded.o||''),targetRole:target,ownerName:String(decoded.on||''),ownerMemberId:String(decoded.om||''),ownerRole};
-   document.getElementById('login').style.display='none';
-   document.getElementById('app').style.display='none';
-   let box=document.getElementById('publicRegistration');
-   if(!box){box=document.createElement('div');box.className='login';box.id='publicRegistration';document.body.appendChild(box)}
-   box.style.display='grid';
-   const ownerLabel=window.__publicRegistration.ownerName+(window.__publicRegistration.ownerMemberId?' • '+window.__publicRegistration.ownerMemberId:'');
-   box.innerHTML=`<div class="login-card" style="max-width:980px;width:95%"><div class="brand"><h1>CAREER NEST</h1><p>MEMBER REGISTRATION</p></div>
-    <div class="card" style="margin-bottom:14px"><b>ROLE:</b> ${esc(ROLE_LABELS[target]||target)}<br><b>PARENT / UNDER:</b> ${target==='INDEPENDENT PROJECT MANAGER'?'NO PARENT':esc(ownerLabel+' • '+(ROLE_LABELS[ownerRole]||ownerRole))}</div>
-    ${memberFormHTML({role:target,status:'PENDING',joiningDate:new Date().toISOString().slice(0,10)})}</div>`;
-   const form=box.querySelector('#memberForm'),roleSel=form.querySelector('[name="role"]'),parentSel=form.querySelector('[name="parentId"]'),statusSel=form.querySelector('[name="status"]');
-   roleSel.innerHTML=`<option value="${esc(target)}">${esc(ROLE_LABELS[target]||target)}</option>`;roleSel.value=target;roleSel.disabled=true;
-   parentSel.innerHTML=target==='INDEPENDENT PROJECT MANAGER'?'<option value="">— NO PARENT —</option>':`<option value="${esc(window.__publicRegistration.ownerId)}">${esc(ownerLabel)} • ${esc(ROLE_LABELS[ownerRole]||ownerRole)}</option>`;parentSel.value=window.__publicRegistration.ownerId;parentSel.disabled=true;
-   statusSel.value='PENDING';statusSel.disabled=true;
-   form.onsubmit=saveMember;
-   return true;
-  }catch(e){console.error(e);alert('INVALID REGISTRATION LINK');return false;}
+    const decoded=JSON.parse(decodeURIComponent(escape(atob(raw)))),target=String(decoded.r||''),ownerRole=String(decoded.or||'');
+    if(!target||!LINK_CHILD_ROLES[ownerRole]?.includes(target))throw new Error('INVALID REGISTRATION LINK');
+    if(!window.careerNestSupabase)throw new Error('SUPABASE IS NOT AVAILABLE');
+    const ctx=await getPublicRegistrationContext(decoded.o,target);
+    window.__publicRegistration={ownerId:String(ctx.owner_id||decoded.o||''),targetRole:target,ownerName:String(ctx.owner_name||decoded.on||''),ownerMemberId:String(ctx.owner_member_id||decoded.om||''),ownerRole:String(ctx.owner_role||ownerRole)};
+    document.getElementById('login').style.display='none';document.getElementById('app').style.display='none';
+    let box=document.getElementById('publicRegistration');if(!box){box=document.createElement('div');box.className='login';box.id='publicRegistration';document.body.appendChild(box)}
+    box.style.display='grid';
+    const ownerLabel=window.__publicRegistration.ownerName+(window.__publicRegistration.ownerMemberId?' • '+window.__publicRegistration.ownerMemberId:'');
+    box.innerHTML=`<div class="login-card" style="max-width:980px;width:95%"><div class="brand"><h1>CAREER NEST</h1><p>MEMBER REGISTRATION — ONLINE</p></div><div class="card" style="margin-bottom:14px"><b>ROLE:</b> ${esc(ROLE_LABELS[target]||target)}<br><b>PARENT / UNDER:</b> ${target==='INDEPENDENT PROJECT MANAGER'?'NO PARENT':esc(ownerLabel+' • '+(ROLE_LABELS[window.__publicRegistration.ownerRole]||window.__publicRegistration.ownerRole))}</div>${memberFormHTML({role:target,status:'PENDING',joiningDate:new Date().toISOString().slice(0,10)})}</div>`;
+    const form=box.querySelector('#memberForm'),roleSel=form.querySelector('[name=role]'),parentSel=form.querySelector('[name=parentId]'),statusSel=form.querySelector('[name=status]');
+    roleSel.innerHTML=`<option value="${esc(target)}">${esc(ROLE_LABELS[target]||target)}</option>`;roleSel.value=target;roleSel.disabled=true;
+    parentSel.innerHTML=target==='INDEPENDENT PROJECT MANAGER'?'<option value="">— NO PARENT —</option>':`<option value="${esc(window.__publicRegistration.ownerId)}">${esc(ownerLabel)} • ${esc(ROLE_LABELS[window.__publicRegistration.ownerRole]||window.__publicRegistration.ownerRole)}</option>`;parentSel.value=window.__publicRegistration.ownerId;parentSel.disabled=true;
+    statusSel.value='PENDING';statusSel.disabled=true;
+    form.onsubmit=savePublicMember;
+    return true;
+  }catch(e){console.error(e);alert(e?.message||'INVALID REGISTRATION LINK');return false;}
 }
+
 async function approveMember(id){
- const m=await get('members',id);
- if(!m)return toast('MEMBER NOT FOUND');
- if(m.status!=='PENDING')return toast('MEMBER IS ALREADY ACTIVE');
- m.status='ACTIVE';
- await put('members',m);
- await audit('MEMBER_APPROVED',m.memberId,m.name);
- toast('MEMBER APPROVED');
- go(state.page);
+  if(window.careerNestSupabase){
+    const {data,error}=await window.careerNestSupabase.from('members').update({status:'ACTIVE'}).eq('id',id).eq('status','PENDING').select('member_id,full_name').maybeSingle();
+    if(error)return toast(error.message||'MEMBER APPROVAL FAILED');
+    if(!data)return toast('MEMBER NOT FOUND OR ALREADY ACTIVE');
+    toast('MEMBER APPROVED');go(state.page);return;
+  }
+  const m=await get('members',id);if(!m)return toast('MEMBER NOT FOUND');if(m.status!=='PENDING')return toast('MEMBER IS ALREADY ACTIVE');m.status='ACTIVE';await put('members',m);await audit('MEMBER_APPROVED',m.memberId,m.name);toast('MEMBER APPROVED');go(state.page);
 }
 async function rejectMember(id){
- const m=await get('members',id);
- if(!m)return toast('MEMBER NOT FOUND');
- m.status='REJECTED';
- await put('members',m);
- await audit('MEMBER_REJECTED',m.memberId,m.name);
- toast('MEMBER REJECTED');
- go(state.page);
+  if(window.careerNestSupabase){
+    const {data,error}=await window.careerNestSupabase.from('members').update({status:'REJECTED'}).eq('id',id).eq('status','PENDING').select('member_id,full_name').maybeSingle();
+    if(error)return toast(error.message||'MEMBER REJECTION FAILED');
+    if(!data)return toast('MEMBER NOT FOUND OR ALREADY PROCESSED');
+    toast('MEMBER REJECTED');go(state.page);return;
+  }
+  const m=await get('members',id);if(!m)return toast('MEMBER NOT FOUND');m.status='REJECTED';await put('members',m);await audit('MEMBER_REJECTED',m.memberId,m.name);toast('MEMBER REJECTED');go(state.page);
 }
+
 function canApproveMember(m){
  return isAdmin() || (m.parentId===state.user?.id);
 }
@@ -835,11 +916,9 @@ async function saveMember(e){
  const pub=window.__publicRegistration||null;
  const role=String(f.get('role')||pub?.targetRole||'').trim(),rootRole=role==='SUPER ADMIN'||role==='INDEPENDENT PROJECT MANAGER';
  let parentId=rootRole?null:(f.get('parentId')?Number(f.get('parentId')):null);
- if(pub){const owner=aa.find(x=>
-  Number(x.id)===Number(pub.ownerId) ||
-  String(x.memberId||x.member_id||'').trim()===String(pub.ownerMemberId||'').trim()
-);
-if(!owner)return toast('REGISTRATION LINK OWNER NOT FOUND');
+ if(pub){
+   const owner=aa.find(x=>Number(x.id)===Number(pub.ownerId));
+   if(!owner)return toast('REGISTRATION LINK OWNER NOT FOUND');
    if(role!==pub.targetRole)return toast('INVALID REGISTRATION ROLE');
    if(!rootRole)parentId=Number(owner.id);
  }else if(!isAdmin()){
@@ -1013,13 +1092,10 @@ async function restoreData(file){if(!file)return;try{const data=JSON.parse(await
 async function factoryReset(){if(!confirm('DELETE ALL LOCAL CRM DATA? Make a backup first.'))return;for(const s of ['members','products','sales','targets','payouts','audit','settings'])await clear(s);location.reload()}
 (async()=>{
  try{
-  await initDB();
   const hasRegistrationLink=new URLSearchParams(location.search).has('register');
-  if(hasRegistrationLink){
-   const handled=await openPublicRegistration();
-   if(handled)return;
-  }
- }catch(e){alert('Unable to initialize offline database: '+(e?.message||e));}
+  if(hasRegistrationLink){const handled=await openPublicRegistration();if(handled)return;}
+  await initDB();
+ }catch(e){console.error(e);alert(e?.message||'Unable to initialize Career Nest CRM');}
 })();
 </script>
 </body>
