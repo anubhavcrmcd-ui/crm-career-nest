@@ -1,3 +1,4 @@
+<!-- CAREER NEST CRM V24.3 FINAL -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -619,35 +620,12 @@ function linkRowsFor(owner){
 }
 async function copyText(v){
   v=String(v||'');
-  try{
-    if(navigator.clipboard&&window.isSecureContext){
-      await navigator.clipboard.writeText(v);
-      toast('REGISTRATION LINK COPIED');
-      return true;
-    }
-  }catch(_){}
-  try{
-    const ta=document.createElement('textarea');
-    ta.value=v;ta.setAttribute('readonly','');
-    ta.style.position='fixed';ta.style.top='0';ta.style.left='0';
-    ta.style.width='1px';ta.style.height='1px';ta.style.opacity='0';
-    document.body.appendChild(ta);ta.focus();ta.select();ta.setSelectionRange(0,ta.value.length);
-    const ok=document.execCommand('copy');ta.remove();
-    if(ok){toast('REGISTRATION LINK COPIED');return true;}
-  }catch(_){}
-  const box=document.createElement('div');
-  box.className='card';
-  box.style.cssText='position:fixed;inset:20px;z-index:200;max-width:900px;margin:auto;height:max-content;box-shadow:0 20px 60px #0005';
-  box.innerHTML='<h3>COPY REGISTRATION LINK</h3><textarea style="min-height:110px"></textarea><div class="actions" style="margin-top:10px"><button type="button" class="btn green" id="manualCopyBtn">COPY NOW</button><button type="button" class="btn light" id="manualCloseBtn">CLOSE</button></div>';
-  document.body.appendChild(box);
-  const t=box.querySelector('textarea');t.value=v;t.focus();t.select();t.setSelectionRange(0,t.value.length);
-  box.querySelector('#manualCopyBtn').onclick=async()=>{
-    try{await navigator.clipboard.writeText(v);toast('REGISTRATION LINK COPIED');box.remove();return;}catch(_){}
-    try{t.focus();t.select();t.setSelectionRange(0,t.value.length);if(document.execCommand('copy')){toast('REGISTRATION LINK COPIED');box.remove();return;}}catch(_){}
-    toast('LINK SELECTED — PRESS CTRL+C');
-  };
-  box.querySelector('#manualCloseBtn').onclick=()=>box.remove();
-  return false;
+  try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(v);toast('REGISTRATION LINK COPIED');return true;}}catch(_){}
+  const box=document.createElement('div'); box.className='card'; box.style.cssText='position:fixed;inset:20px;z-index:200;max-width:900px;margin:auto;height:max-content;box-shadow:0 20px 60px #0005';
+  box.innerHTML='<h3>COPY REGISTRATION LINK</h3><textarea style="min-height:110px;width:100%"></textarea><div class="actions" style="margin-top:10px"><button type="button" class="btn green" id="manualCopyBtn">COPY NOW</button><button type="button" class="btn light" id="manualCloseBtn">CLOSE</button></div>';
+  document.body.appendChild(box); const ta=box.querySelector('textarea'); ta.value=v; ta.focus(); ta.select(); ta.setSelectionRange(0,ta.value.length);
+  box.querySelector('#manualCopyBtn').onclick=async()=>{try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(v);toast('REGISTRATION LINK COPIED');box.remove();return;}}catch(_){} try{ta.focus();ta.select();if(document.execCommand('copy')){toast('REGISTRATION LINK COPIED');box.remove();return;}}catch(_){} toast('LINK SELECTED — PRESS CTRL+C');};
+  box.querySelector('#manualCloseBtn').onclick=()=>box.remove(); return false;
 }
 async function openMyRegistrationLinks(){
  const owner=state.user;if(!owner)return;
@@ -947,6 +925,7 @@ async function openMemberForm(id=null){
 }
 async function saveMember(e){
  e.preventDefault();
+ if(window.__publicRegistration){ return savePublicMember(e); }
  const f=new FormData(e.target),aa=await all('members'),id=f.get('id')?Number(f.get('id')):null,old=id?aa.find(x=>x.id===id):null;
  if(id&&!old)return toast('MEMBER NOT FOUND');
  const pub=window.__publicRegistration||null;
@@ -955,7 +934,7 @@ async function saveMember(e){
  if(pub){
    const owner=aa.find(x=>String(x.id)===String(pub.ownerId));
    if(!owner)return toast('REGISTRATION LINK OWNER NOT FOUND');
-   if(role!==pub.targetRole)return toast('INVALID REGISTRATION ROLE');
+   /* V24.3: role validation is performed by Supabase registration RPC. */
    if(!rootRole)parentId=String(owner.id);
  }else if(!isAdmin()){
    parentId=rootRole?null:state.user.id;
