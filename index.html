@@ -647,63 +647,95 @@ async function savePublicMember(e){
   window.__publicSaving=true;
   const submitBtn=form.querySelector('button[type=submit],button:not([type])');
   const oldBtnText=submitBtn?submitBtn.textContent:'';
-  if(submitBtn){submitBtn.disabled=true;submitBtn.textContent='SUBMITTING…';}
-  const f=new FormData(form),pub=window.__publicRegistration;
-  if(!pub){window.__publicSaving=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=oldBtnText;}return toast('INVALID REGISTRATION SESSION');}
-  const name=String(f.get('name')||'').trim().toUpperCase();
-  const email=String(f.get('email')||'').trim().toLowerCase();
-  const password=String(f.get('password')||'').trim();
-  const mobile=String(f.get('mobile')||'').replace(/\D/g,'');
-  if(!name)return toast('FULL NAME IS REQUIRED');
-  if(!email||!email.includes('@'))return toast('VALID EMAIL IS REQUIRED');
-  if(!/^[6-9][0-9]{9}$/.test(mobile))return toast('MOBILE MUST BE EXACTLY 10 DIGITS');
-  if(password.length<8)return toast('PASSWORD MUST BE AT LEAST 8 CHARACTERS');
-  if(!f.get('declaration'))return toast('DECLARATION IS REQUIRED');
-  const requiredDocs=['photo','signature','aadhaarDoc','panDoc','cheque'];
-  for(const k of requiredDocs){
-    const file=f.get(k);
-    if(!file||!file.size)return toast(k==='aadhaarDoc'?'AADHAAR DOCUMENT IS REQUIRED':k==='panDoc'?'PAN DOCUMENT IS REQUIRED':k==='cheque'?'CANCELLED CHEQUE / BANK DOCUMENT IS REQUIRED':k==='signature'?'SIGNATURE IS REQUIRED':'PHOTO IS REQUIRED');
-    const ok=(k==='photo'||k==='signature')?file.type.startsWith('image/'):(file.type.startsWith('image/')||file.type==='application/pdf');
-    if(!ok)return toast('INVALID FILE TYPE FOR '+k.toUpperCase());
-    if(file.size>5*1024*1024)return toast(k.toUpperCase()+' MUST BE 5 MB OR LESS');
+  const reset=()=>{window.__publicSaving=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=oldBtnText;}};
+  const fail=msg=>{reset();toast(String(msg||'REGISTRATION SUBMISSION FAILED'));};
+  try{
+    if(submitBtn){submitBtn.disabled=true;submitBtn.textContent='SUBMITTING…';}
+    const f=new FormData(form),pub=window.__publicRegistration;
+    if(!pub)return fail('INVALID REGISTRATION SESSION');
+    const name=String(f.get('name')||'').trim().toUpperCase();
+    const email=String(f.get('email')||'').trim().toLowerCase();
+    const password=String(f.get('password')||'').trim();
+    const mobile=String(f.get('mobile')||'').replace(/\D/g,'');
+    if(!name)return fail('FULL NAME IS REQUIRED');
+    if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return fail('VALID EMAIL IS REQUIRED');
+    if(!/^[6-9][0-9]{9}$/.test(mobile))return fail('MOBILE MUST BE EXACTLY 10 DIGITS');
+    if(password.length<8)return fail('PASSWORD MUST BE AT LEAST 8 CHARACTERS');
+    if(!f.get('declaration'))return fail('DECLARATION IS REQUIRED');
+
+    const requiredDocs=['photo','signature','aadhaarDoc','panDoc','cheque'];
+    const files={};
+    for(const k of requiredDocs){
+      const file=f.get(k);
+      if(!file||!file.size)return fail(k==='aadhaarDoc'?'AADHAAR DOCUMENT IS REQUIRED':k==='panDoc'?'PAN DOCUMENT IS REQUIRED':k==='cheque'?'CANCELLED CHEQUE / BANK DOCUMENT IS REQUIRED':k==='signature'?'SIGNATURE IS REQUIRED':'PHOTO IS REQUIRED');
+      const ok=(k==='photo'||k==='signature')?file.type.startsWith('image/'):(file.type.startsWith('image/')||file.type==='application/pdf');
+      if(!ok)return fail('INVALID FILE TYPE FOR '+k.toUpperCase());
+      if(file.size>5*1024*1024)return fail(k.toUpperCase()+' MUST BE 5 MB OR LESS');
+      files[k]=file;
+    }
+    const pan=String(f.get('pan')||'').trim().toUpperCase();if(pan&&!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan))return fail('PAN MUST BE 10 CHARACTERS: 5 LETTERS + 4 NUMBERS + 1 LETTER');
+    const pin=String(f.get('pin')||'').replace(/\D/g,'');if(pin&&!/^[0-9]{6}$/.test(pin))return fail('PIN CODE MUST BE EXACTLY 6 DIGITS');
+    const aad=String(f.get('aadhaar4')||'').replace(/\D/g,'');if(aad&&!/^[0-9]{4}$/.test(aad))return fail('AADHAAR LAST 4 MUST BE 4 DIGITS');
+    const ifsc=String(f.get('ifsc')||'').trim().toUpperCase();if(ifsc&&!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc))return fail('IFSC MUST BE 11 CHARACTERS: 4 LETTERS + 0 + 6 ALPHANUMERIC');
+
+    // Create/verify the Auth identity first. The DB RPC never trusts a role or parent from the browser.
+    let authData=null;
+    let authError=null;
+    ({data:authData,error:authError}=await window.careerNestSupabase.auth.signUp({email,password}));
+    let authUser=authData?.user||null;
+    if(authError){
+      const msg=String(authError.message||'');
+      if(/already|registered|user already exists/i.test(msg)){
+        const retry=await window.careerNestSupabase.auth.signInWithPassword({email,password});
+        if(retry.error)return fail('EMAIL ALREADY REGISTERED — USE A NEW EMAIL OR THE SAME EMAIL/PASSWORD USED FOR THIS PENDING REGISTRATION');
+        authUser=retry.data?.user||null;
+      }else return fail(msg);
+    }
+    if(!authUser?.id)return fail('AUTHENTICATION USER WAS NOT CREATED');
+
+    // Keep RPC payload small: images are resized/compressed in-browser; PDFs are only base64 encoded.
+    const docs={};
+    for(const k of requiredDocs){
+      const file=files[k];
+      docs[k]=await readRegistrationFile(file,k);
+    }
+    const payload={
+      member_id:uid('CN'),full_name:name,name,father:String(f.get('father')||'').trim().toUpperCase(),father_name:String(f.get('father')||'').trim().toUpperCase(),
+      dob:String(f.get('dob')||'').trim(),mobile,email,address:String(f.get('address')||'').trim().toUpperCase(),
+      state:String(f.get('state')||'').trim().toUpperCase(),state_name:String(f.get('state')||'').trim().toUpperCase(),district:String(f.get('district')||'').trim().toUpperCase(),district_name:String(f.get('district')||'').trim().toUpperCase(),city:String(f.get('city')||'').trim().toUpperCase(),pin,pan,aadhaar4,
+      account_name:String(f.get('accountName')||'').trim().toUpperCase(),accountName:String(f.get('accountName')||'').trim().toUpperCase(),bank:String(f.get('bank')||'').trim().toUpperCase(),account_no:String(f.get('accountNo')||'').trim(),accountNo:String(f.get('accountNo')||'').trim(),ifsc,
+      commission_type:String(f.get('commissionType')||'PERCENTAGE').trim().toUpperCase(),commissionType:String(f.get('commissionType')||'PERCENTAGE').trim().toUpperCase(),commission_value:Number(f.get('commissionValue')||0),commissionValue:Number(f.get('commissionValue')||0),target_amount:Number(f.get('targetAmount')||0),targetAmount:Number(f.get('targetAmount')||0),
+      joining_date:String(f.get('joiningDate')||new Date().toISOString().slice(0,10)),joiningDate:String(f.get('joiningDate')||new Date().toISOString().slice(0,10)),status:'PENDING',auth_user_id:authUser.id,...docs
+    };
+    if(submitBtn)submitBtn.textContent='SAVING REGISTRATION…';
+    const rpcPromise=window.careerNestSupabase.rpc('public_register_member',{p_owner_id:String(pub.ownerId),p_target_role:String(pub.targetRole),p_auth_user_id:String(authUser.id),p_payload:payload});
+    const timeout=new Promise((_,rej)=>setTimeout(()=>rej(new Error('REGISTRATION SAVE TIMED OUT. PLEASE TRY AGAIN WITH SMALLER DOCUMENT FILES.')),45000));
+    const {data:newMember,error:insertError}=await Promise.race([rpcPromise,timeout]);
+    if(insertError)throw new Error(insertError.message||'REGISTRATION SUBMISSION FAILED');
+    if(!newMember)throw new Error('REGISTRATION WAS NOT SAVED');
+    try{await window.careerNestSupabase.auth.signOut();}catch(_){}
+    window.__publicRegistration=null;
+    const box=document.getElementById('publicRegistration');
+    if(box)box.innerHTML=`<div class="login-card" style="max-width:720px;width:95%"><div class="brand"><h1>CAREER NEST</h1><p>REGISTRATION SUBMITTED</p></div><div class="card"><h3>REGISTRATION RECEIVED</h3><p>Your registration has been submitted successfully and is pending approval.</p><p><b>MEMBER ID:</b> ${esc(newMember?.member_id||newMember?.memberId||payload.member_id)}</p><p class="hint">Your login will be available after the registration is approved and email verification requirements are completed.</p></div><button class="btn" onclick="location.href=location.href.split('?')[0]">GO TO LOGIN</button></div>`;
+  }catch(err){
+    console.error('PUBLIC REGISTRATION FAILED',err);
+    try{await window.careerNestSupabase?.auth?.signOut();}catch(_){}
+    fail(err?.message||'REGISTRATION SUBMISSION FAILED');
   }
-  const pan=String(f.get('pan')||'').trim().toUpperCase();if(pan&&!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan))return toast('PAN MUST BE 10 CHARACTERS: 5 LETTERS + 4 NUMBERS + 1 LETTER');
-  const pin=String(f.get('pin')||'').replace(/\D/g,'');if(pin&&!/^[0-9]{6}$/.test(pin))return toast('PIN CODE MUST BE EXACTLY 6 DIGITS');
-  const aad=String(f.get('aadhaar4')||'').replace(/\D/g,'');if(aad&&!/^[0-9]{4}$/.test(aad))return toast('AADHAAR LAST 4 MUST BE 4 DIGITS');
-  const ifsc=String(f.get('ifsc')||'').trim().toUpperCase();if(ifsc&&!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc))return toast('IFSC MUST BE 11 CHARACTERS: 4 LETTERS + 0 + 6 ALPHANUMERIC');
-  const {data:authData,error:authError}=await window.careerNestSupabase.auth.signUp({email,password});
-  if(authError){
-    window.__publicSaving=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=oldBtnText;}
-    const msg=String(authError.message||'').toLowerCase();
-    return toast(msg.includes('already')||msg.includes('registered')?'EMAIL ALREADY REGISTERED':authError.message);
-  }
-  const authUser=authData?.user;
-  if(!authUser){
-    window.__publicSaving=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=oldBtnText;}
-    return toast('AUTHENTICATION USER WAS NOT CREATED');
-  }
-  const docs={};
-  for(const k of requiredDocs){const file=f.get(k);if(file&&file.size)docs[k]=await readFile(file);}
-  const payload={
-    member_id:uid('CN'),full_name:name,name,father:String(f.get('father')||'').trim().toUpperCase(),father_name:String(f.get('father')||'').trim().toUpperCase(),
-    dob:String(f.get('dob')||'').trim(),mobile,email,address:String(f.get('address')||'').trim().toUpperCase(),
-    state:String(f.get('state')||'').trim().toUpperCase(),state_name:String(f.get('state')||'').trim().toUpperCase(),
-    district:String(f.get('district')||'').trim().toUpperCase(),district_name:String(f.get('district')||'').trim().toUpperCase(),city:String(f.get('city')||'').trim().toUpperCase(),pin,pan,aadhaar4,
-    account_name:String(f.get('accountName')||'').trim().toUpperCase(),accountName:String(f.get('accountName')||'').trim().toUpperCase(),
-    bank:String(f.get('bank')||'').trim().toUpperCase(),account_no:String(f.get('accountNo')||'').trim(),accountNo:String(f.get('accountNo')||'').trim(),ifsc,
-    commission_type:String(f.get('commissionType')||'PERCENTAGE').trim().toUpperCase(),commissionType:String(f.get('commissionType')||'PERCENTAGE').trim().toUpperCase(),
-    commission_value:Number(f.get('commissionValue')||0),commissionValue:Number(f.get('commissionValue')||0),
-    target_amount:Number(f.get('targetAmount')||0),targetAmount:Number(f.get('targetAmount')||0),
-    joining_date:String(f.get('joiningDate')||new Date().toISOString().slice(0,10)),joiningDate:String(f.get('joiningDate')||new Date().toISOString().slice(0,10)),
-    status:'PENDING',auth_user_id:authUser.id,
-    ...docs
-  };
-  const {data:newMember,error:insertError}=await window.careerNestSupabase.rpc('public_register_member',{p_owner_id:String(pub.ownerId),p_target_role:String(pub.targetRole),p_auth_user_id:String(authUser.id),p_payload:payload});
-  if(insertError){try{await window.careerNestSupabase.auth.signOut();}catch(_){}window.__publicSaving=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=oldBtnText;}return toast(insertError.message||'REGISTRATION SUBMISSION FAILED');}
-  try{await window.careerNestSupabase.auth.signOut();}catch(_){}
-  window.__publicRegistration=null;
-  const box=document.getElementById('publicRegistration');
-  if(box){box.innerHTML=`<div class="login-card" style="max-width:720px;width:95%"><div class="brand"><h1>CAREER NEST</h1><p>REGISTRATION SUBMITTED</p></div><div class="card"><h3>REGISTRATION RECEIVED</h3><p>Your registration has been submitted successfully and is pending approval.</p><p><b>MEMBER ID:</b> ${esc(newMember?.member_id||newMember?.memberId||payload.member_id)}</p><p class="hint">Your login will be available after the registration is approved and email verification requirements are completed.</p></div><button class="btn" onclick="location.href=location.href.split('?')[0]">GO TO LOGIN</button></div>`;}
+}
+
+async function readRegistrationFile(file,key){
+  if(file.type==='application/pdf')return readFile(file);
+  try{
+    const dataUrl=await readFile(file);
+    const img=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=dataUrl;});
+    const max=key==='signature'?1000:1400;
+    const scale=Math.min(1,max/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height));
+    const w=Math.max(1,Math.round((img.naturalWidth||img.width)*scale)),h=Math.max(1,Math.round((img.naturalHeight||img.height)*scale));
+    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+    const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,w,h);
+    return canvas.toDataURL('image/jpeg',key==='signature'?0.72:0.78);
+  }catch(_){return readFile(file);}
 }
 
 function decodeRegistrationToken(raw){
