@@ -1,5 +1,5 @@
-<!-- CAREER NEST CRM V25 FINAL -->
-<!-- CAREER NEST CRM V24.8 FINAL PM DIRECT SALES + ID CARD -->
+<!-- CAREER NEST CRM V25.1 CLOUD SALES FINAL -->
+<!-- V25.1: SUPABASE CLOUD SALES + COMMISSION -->
 <!-- CAREER NEST CRM V24.7 FINAL ONLINE MEMBER SALES + ID CARD -->
 <!-- CAREER NEST CRM V24.3 FINAL -->
 <!doctype html>
@@ -7,7 +7,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CAREER NEST CRM — V24 Online Registration</title>
+<title>CAREER NEST CRM — V25.1 Cloud Sales</title>
 <style>
 :root{--nav:#0b2447;--nav2:#123b6d;--green:#4b8f2c;--ink:#172033;--muted:#667085;--bg:#f4f7fb;--card:#fff;--line:#e5e7eb;--danger:#c62828;--shadow:0 8px 28px rgba(16,24,40,.08)}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -435,6 +435,25 @@ async function syncCloudMembersToLocal(){
  }catch(e){console.error(e);return false}
 }
 async function fetchOnlineMembers(){const {data,error}=await window.careerNestSupabase.from('members').select('*, roles:role_id(code,name)').eq('status','ACTIVE').order('created_at',{ascending:true});if(error)throw error;return data||[]}
+async function syncCloudSalesToLocal(){
+ if(!window.careerNestSupabase||!state.db)return false;
+ try{
+  const {data,error}=await window.careerNestSupabase.rpc('public_list_sales');
+  if(error)throw error;
+  const local=await all('sales');
+  const byCloud=new Map(local.filter(x=>x.cloudSaleId).map(x=>[String(x.cloudSaleId),x]));
+  const bySale=new Map(local.filter(x=>x.saleId).map(x=>[String(x.saleId),x]));
+  let next=Math.max(0,...local.map(x=>Number(x.id)||0))+1;
+  for(const r of (data||[])){
+    const sellerLocal=(await all('members')).find(m=>String(m.cloudId||'')===String(r.seller_id));
+    if(!sellerLocal)continue;
+    const old=byCloud.get(String(r.id))||bySale.get(String(r.sale_id))||{};
+    await put('sales',{...old,id:old.id||next++,cloudSaleId:String(r.id),saleId:r.sale_id,date:r.sale_date,sellerId:sellerLocal.id,productId:r.product_id?Number(r.product_id)||r.product_id:null,productName:r.product_name,quantity:Number(r.quantity||1),customerName:r.customer_name||'',customerMobile:r.customer_mobile||'',customerEmail:r.customer_email||'',customerAddress:r.customer_address||'',price:Number(r.price||0),gst:Number(r.gst||0),base:Number(r.commission_base||0),total:Number(r.total||0),commission:Number(r.commission||0),tds:Number(r.tds||0),status:r.status||'COMPLETED',totalPayable:Number(r.total_payable||0),payoutId:r.payout_id||null,createdAt:r.created_at});
+  }
+  return true;
+ }catch(e){console.error('Cloud sales sync failed',e);return false}
+}
+
 function cloudLocal(m){return {...m,id:Math.abs(hashString(String(m.id)))+1,cloudId:String(m.id),memberId:m.member_id||'',name:m.full_name||m.name||'',role:normalizeRoleCode(m.roles?.code||m.roles?.name||m.role||'MEMBER'),status:String(m.status||'ACTIVE').toUpperCase()}}
 function hashString(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 async function openOnlineMemberIDCard(id){try{const {data,error}=await window.careerNestSupabase.from('members').select('*, roles:role_id(code,name)').eq('id',String(id)).maybeSingle();if(error)throw error;if(!data)return toast('MEMBER NOT FOUND');const m=cloudLocal(data);document.getElementById('modalTitle').textContent='MEMBER ID CARD';document.getElementById('modalBody').innerHTML=`<div class="actions"><button class="btn green" onclick="printIDPair()">PRINT ID CARD</button></div><div id="idPrint">${idCardPairHTML(m,[m])}</div>`;document.getElementById('modal').classList.add('show')}catch(e){toast('ID CARD LOAD FAILED: '+(e.message||e))}}
@@ -443,8 +462,10 @@ async function audit(action,recordId='',details=''){await put('audit',{user:stat
 async function settings(){const x=await all('settings');return x[0]||{tds:5}}
 function scopeMembers(ms){
  if(isAdmin())return ms;
- const ids=new Set([state.user.id]);let loop=true;
- while(loop){loop=false;for(const m of ms)if(m.parentId&&ids.has(m.parentId)&&!ids.has(m.id)){ids.add(m.id);loop=true}}
+ const me=ms.find(m=>String(m.cloudId||'')===String(state.user?.cloudId||''))||ms.find(m=>Number(m.id)===Number(state.user?.id));
+ if(!me)return [];
+ const ids=new Set([me.id]);let loop=true;
+ while(loop){loop=false;for(const m of ms)if(m.parentId!=null&&ids.has(m.parentId)&&!ids.has(m.id)){ids.add(m.id);loop=true}}
  return ms.filter(m=>ids.has(m.id));
 }
 function memberName(id,ms){const m=ms.find(x=>x.id==id);return m?m.name:'—'}
@@ -546,7 +567,7 @@ function buildNav(){
  if(!isAdmin())['products','audit'].forEach(x=>{const b=n.querySelector(`[data-page="${x}"]`);if(b)b.style.display='none'});
 }
 function go(p){state.page=p;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===p));document.getElementById('pageTitle').textContent=NAV.find(x=>x[0]===p)?.[1]||'Dashboard';render(p)}
-async function render(p){const c=document.getElementById('content');c.innerHTML='<div class="card">Loading…</div>';await (views[p]||views.dashboard)(c)}
+async function render(p){const c=document.getElementById('content');c.innerHTML='<div class="card">Loading…</div>';try{await syncCloudMembersToLocal();await syncCloudSalesToLocal()}catch(_){ }await (views[p]||views.dashboard)(c)}
 function logout(){state.user=null;document.getElementById('app').style.display='none';document.getElementById('login').style.display='grid'}
 document.getElementById('loginForm').onsubmit=async e=>{
  e.preventDefault();
@@ -1047,9 +1068,26 @@ async function openProductForm(id=null){
 async function openSaleForm(){await syncCloudMembersToLocal();const aa=await all('members'),me=aa.find(m=>String(m.cloudId||'')===String(state.user?.cloudId||''))||aa.find(m=>Number(m.id)===Number(state.user?.id));let ms=isAdmin()?aa.filter(m=>m.status==='ACTIVE'):scopeMembers(aa).filter(m=>m.status==='ACTIVE');if(me&&!ms.some(m=>Number(m.id)===Number(me.id)))ms.unshift(me);const ps=await all('products');document.getElementById('modalTitle').textContent='Record Sale';document.getElementById('modalBody').innerHTML=`<form id="saleForm" class="form-grid"><div class="field"><label>Seller</label><select name="sellerId" required>${me?`<option value="${me.id}" selected>${esc(me.name)} • ${esc(me.memberId)} • DIRECT SALE</option>`:''}${ms.filter(m=>!me||Number(m.id)!==Number(me.id)).map(m=>`<option value="${m.id}">${esc(m.name)} • ${esc(m.memberId)} • ${esc(m.role)}</option>`).join('')}</select></div><div class="field"><label>Product</label><select name="productId" required>${ps.filter(p=>p.status==='ACTIVE').map(p=>`<option value="${p.id}">${esc(p.name)} — ${money(p.price)}</option>`).join('')}</select></div><div class="field"><label>Quantity</label><input name="quantity" type="number" min="1" value="1"></div><div class="field"><label>Sale Date</label><input name="date" type="date" value="${new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Customer Name *</label><input name="customerName" required></div><div class="field"><label>Customer Mobile</label><input name="customerMobile" inputmode="numeric"></div><div class="field"><label>Customer Email</label><input name="customerEmail" type="email"></div><div class="field full"><label>Customer Address</label><textarea name="customerAddress"></textarea></div><div class="field full"><button class="btn green">Save Sale & Calculate Commission</button></div></form>`;document.getElementById('modal').classList.add('show');document.getElementById('saleForm').onsubmit=saveSale}
 
 async function saveSale(e){
- e.preventDefault();const f=new FormData(e.target),aa=await all('members'),p=await get('products',Number(f.get('productId'))),me=aa.find(m=>String(m.cloudId||'')===String(state.user?.cloudId||''))||aa.find(m=>Number(m.id)===Number(state.user?.id)),requestedSeller=aa.find(m=>m.id===Number(f.get('sellerId'))),seller=(me&&me.role==='INDEPENDENT PROJECT MANAGER'&&(!requestedSeller||Number(requestedSeller.id)===Number(me.id)))?me:requestedSeller,q=Number(f.get('quantity')||1),base=Number(p.base||0)*q,total=Number(p.price||0)*q,commission=seller.commissionType==='FIXED'?Number(seller.commissionValue||0)*q:base*Number(seller.commissionValue||0)/100,s=await settings(),tds=commission*Number(s.tds||5)/100;
- const o={saleId:uid('SALE'),date:f.get('date'),sellerId:seller.id,productId:p.id,productName:p.name,quantity:q,customerName:f.get('customerName'),customerMobile:f.get('customerMobile'),customerEmail:f.get('customerEmail'),customerAddress:f.get('customerAddress'),price:p.price,gst:p.gst,base,total,commission,tds,status:'COMPLETED',totalPayable:Math.max(0,commission-tds)};
- await put('sales',o);await audit('SALE_CREATED',o.saleId,`${seller.name} / ${p.name}`);closeModal();toast('Sale saved. Commission calculated.');go('sales')
+ e.preventDefault();
+ try{
+  const f=new FormData(e.target),aa=await all('members'),p=await get('products',Number(f.get('productId')));
+  if(!p)return toast('PRODUCT NOT FOUND');
+  const me=aa.find(m=>String(m.cloudId||'')===String(state.user?.cloudId||''))||aa.find(m=>Number(m.id)===Number(state.user?.id));
+  const requestedSeller=aa.find(m=>Number(m.id)===Number(f.get('sellerId')));
+  const seller=(me&&me.role==='INDEPENDENT PROJECT MANAGER'&&(!requestedSeller||Number(requestedSeller.id)===Number(me.id)))?me:requestedSeller;
+  if(!seller||!seller.cloudId)return toast('SELLER CLOUD PROFILE NOT FOUND');
+  const q=Math.max(1,Number(f.get('quantity')||1)),base=Number(p.base||0)*q,total=Number(p.price||0)*q;
+  const commission=seller.commissionType==='FIXED'?Number(seller.commissionValue||0)*q:base*Number(seller.commissionValue||0)/100;
+  const st=await settings(),tds=commission*Number(st.tds||5)/100;
+  const saleId=uid('SALE');
+  const payload={sale_id:saleId,sale_date:f.get('date'),seller_id:String(seller.cloudId),product_id:String(p.id),product_name:p.name,quantity:q,customer_name:f.get('customerName'),customer_mobile:f.get('customerMobile'),customer_email:f.get('customerEmail'),customer_address:f.get('customerAddress'),price:Number(p.price||0),gst:Number(p.gst||0),commission_base:base,total,commission,tds,status:'COMPLETED'};
+  const {data,error}=await window.careerNestSupabase.rpc('public_create_sale',{p_sale:payload});
+  if(error)throw error;
+  if(!data)throw new Error('SALE WAS NOT SAVED TO CLOUD');
+  await syncCloudMembersToLocal();await syncCloudSalesToLocal();
+  await audit('SALE_CREATED',data.sale_id,`${seller.name} / ${p.name}`);
+  closeModal();toast('SALE SAVED TO SUPABASE. COMMISSION CALCULATED.');go('sales');
+ }catch(err){console.error(err);toast('SALE SAVE FAILED: '+(err?.message||err))}
 }
 async function openTargetForm(){
  const aa=await all('members'),ms=scopeMembers(aa).filter(m=>m.status==='ACTIVE');document.getElementById('modalTitle').textContent='Set Monthly Target';
