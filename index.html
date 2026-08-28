@@ -314,9 +314,10 @@ window.CAREER_NEST_REGISTRATION_EMAIL_TO="anubhavcrmcd@gmail.com";window.CAREER_
   // All normal text fields are automatically uppercased.
   // Email and password remain case-sensitive/free-form.
   function isExcluded(el){
-    return !el || ['EMAIL','PASSWORD'].includes((el.type || '').toUpperCase()) ||
-      ['email','password'].includes((el.id || '').toLowerCase());
-  }
+  return !el ||
+    ['EMAIL','PASSWORD','FILE'].includes((el.type || '').toUpperCase()) ||
+    ['email','password'].includes((el.id || '').toLowerCase());
+}
 
   function upperize(el){
     if (!el || isExcluded(el)) return;
@@ -767,8 +768,8 @@ async function savePublicMember(e){
   const payload={
     member_id:uid('CN'),full_name:name,name,father:String(f.get('father')||'').trim().toUpperCase(),father_name:String(f.get('father')||'').trim().toUpperCase(),
     dob:String(f.get('dob')||'').trim(),mobile,email,address:String(f.get('address')||'').trim().toUpperCase(),
-    state:String(f.get('state')||'').trim().toUpperCase(),state_name:String(f.get('state')||'').trim().toUpperCase(),
-    district:String(f.get('district')||'').trim().toUpperCase(),district_name:String(f.get('district')||'').trim().toUpperCase(),city:String(f.get('city')||'').trim().toUpperCase(),pin,pan,aadhaar4,
+state:String(f.get('state')||'').trim().toUpperCase(),state_name:String(f.get('state')||'').trim().toUpperCase(),
+district:String(f.get('district')||'').trim().toUpperCase(),district_name:String(f.get('district')||'').trim().toUpperCase(),city:String(f.get('city')||'').trim().toUpperCase(),pin,pan,aadhaar4:aad,
     account_name:String(f.get('accountName')||'').trim().toUpperCase(),accountName:String(f.get('accountName')||'').trim().toUpperCase(),
     bank:String(f.get('bank')||'').trim().toUpperCase(),account_no:String(f.get('accountNo')||'').trim(),accountNo:String(f.get('accountNo')||'').trim(),ifsc,
     commission_type:String(f.get('commissionType')||'PERCENTAGE').trim().toUpperCase(),commissionType:String(f.get('commissionType')||'PERCENTAGE').trim().toUpperCase(),
