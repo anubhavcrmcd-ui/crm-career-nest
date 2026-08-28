@@ -1,3 +1,4 @@
+<!-- CAREER NEST CRM V24.7 FINAL ONLINE MEMBER SALES + ID CARD -->
 <!-- CAREER NEST CRM V24.3 FINAL -->
 <!doctype html>
 <html lang="en">
@@ -413,6 +414,87 @@ function normalizeRoleCode(r){
 }
 function isAdmin(){return state.user?.role==='SUPER ADMIN'}
 function roleRank(r){return ROLES.indexOf(r)}
+function localMemberId(){
+  const ms=state.db?state.db.transaction('members').objectStore('members'):null;
+  return ms?null:null;
+}
+async function syncCloudMembersToLocal(){
+  if(!window.careerNestSupabase||!state.db)return;
+  try{
+    const {data,error}=await window.careerNestSupabase
+      .from('members')
+      .select('*, roles:role_id(code,name)')
+      .eq('status','ACTIVE');
+    if(error||!Array.isArray(data))return;
+
+    const local=await all('members');
+    const byCloud=new Map(local.filter(x=>x.cloudId).map(x=>[String(x.cloudId),x]));
+    const byMemberId=new Map(local.filter(x=>x.memberId).map(x=>[String(x.memberId),x]));
+    const idMap=new Map();
+    let next=Math.max(0,...local.map(x=>Number(x.id)||0))+1;
+
+    // First assign stable local IDs for every cloud member.
+    for(const m of data){
+      const cloudId=String(m.id);
+      let row=byCloud.get(cloudId)||byMemberId.get(String(m.member_id));
+      if(!row){ row={id:next++,cloudId}; }
+      idMap.set(cloudId,row.id);
+    }
+
+    for(const m of data){
+      const row=byCloud.get(String(m.id))||byMemberId.get(String(m.member_id))||{id:idMap.get(String(m.id)),cloudId:String(m.id)};
+      const roleCode=normalizeRoleCode(Array.isArray(m.roles)?(m.roles[0]?.code||'MEMBER'):(m.roles?.code||'MEMBER'));
+      const parentLocal=m.parent_member_id ? (byMemberId.get(String(data.find(x=>String(x.id)===String(m.parent_member_id))?.member_id||''))?.id || idMap.get(String(m.parent_member_id)) || null) : null;
+      const merged={
+        ...row,
+        cloudId:String(m.id),
+        authUserId:m.auth_user_id||'',
+        memberId:m.member_id||'',
+        name:m.full_name||m.name||'',
+        full_name:m.full_name||'',
+        role:roleCode,
+        role_id:m.role_id,
+        parentId:parentLocal,
+        parent_member_id:m.parent_member_id||null,
+        status:String(m.status||'ACTIVE').toUpperCase(),
+        email:m.email||'',
+        mobile:m.mobile||'',
+        father:m.father_name||m.father||'',
+        dob:m.dob||'',
+        address:m.address||'',
+        state:m.state_name||m.state||'',
+        district:m.district_name||m.district||'',
+        city:m.city_name||m.city||'',
+        pin:m.pin_code||m.pin||'',
+        pan:m.pan||'',
+        aadhaar4:m.aadhaar_last4||m.aadhaar4||'',
+        accountName:m.account_name||m.accountName||'',
+        bank:m.bank_name||m.bank||'',
+        accountNo:m.account_no||m.accountNo||'',
+        ifsc:m.ifsc||'',
+        photo:m.photo||'',
+        aadhaarDoc:m.aadhaar_doc||m.aadhaarDoc||'',
+        panDoc:m.pan_doc||m.panDoc||'',
+        cheque:m.cheque||'',
+        signature:m.signature||'',
+        joiningDate:m.joining_date||m.joiningDate||'',
+        commissionType:m.commission_type||m.commissionType||'PERCENTAGE',
+        commissionValue:Number(m.commission_value??m.commissionValue??0),
+        targetAmount:Number(m.target_amount??m.targetAmount??0),
+        createdAt:m.created_at||m.createdAt||new Date().toISOString()
+      };
+      await put('members',merged);
+      if(state.user && String(state.user.cloudId||state.user.id)===String(m.id)){
+        state.user={...state.user,...merged,id:merged.id};
+      }
+    }
+    return true;
+  }catch(err){
+    console.warn('Cloud member sync skipped:',err);
+    return false;
+  }
+}
+
 async function audit(action,recordId='',details=''){await put('audit',{user:state.user?.memberId||'SYSTEM',action,recordId,details,dateTime:new Date().toISOString(),ip:'LOCAL'})}
 async function settings(){const x=await all('settings');return x[0]||{tds:5}}
 function scopeMembers(ms){
@@ -535,7 +617,10 @@ document.getElementById('loginForm').onsubmit=async e=>{
  if(!m){ await window.careerNestSupabase.auth.signOut(); toast('Member profile not found for this Supabase Auth user'); return; }
  if(String(m.status||'').toUpperCase()!=='ACTIVE'){ await window.careerNestSupabase.auth.signOut(); toast('Your account is not active'); return; }
  const roleCode=normalizeRoleCode(Array.isArray(m.roles)?(m.roles[0]?.code||'MEMBER'):(m.roles?.code||'MEMBER'));
- state.user={...m, id:m.id, memberId:m.member_id, name:m.full_name, role:roleCode, role_id:m.role_id, status:m.status, authUserId:authUser.id};
+ state.user={...m, cloudId:String(m.id), id:m.id, memberId:m.member_id, name:m.full_name, role:roleCode, role_id:m.role_id, status:m.status, authUserId:authUser.id};
+ await syncCloudMembersToLocal();
+ const synced=state.user && state.user.cloudId===String(m.id) ? state.user : state.user;
+ if(synced) state.user={...synced, memberId:m.member_id, name:m.full_name, role:roleCode, role_id:m.role_id, status:m.status, authUserId:authUser.id};
  document.getElementById('login').style.display='none';
  document.getElementById('app').style.display='block';
  document.getElementById('userChip').textContent=(m.full_name||email)+' • '+roleCode;
@@ -585,7 +670,7 @@ registration:async c=>{
   const roleOf=m=>m.roles?.code||'MEMBER',nameOf=m=>m.full_name||m.name||'—',idOf=m=>m.member_id||'—';
   c.innerHTML=`<div class="card"><div class="section-title"><div><h3>NEW REGISTRATION</h3><div class="hint">ONLINE REGISTRATION LINKS AND PENDING REGISTRATIONS</div></div><button class="btn green" onclick="openMemberForm()">+ NEW REGISTRATION</button></div><div class="card" style="padding:14px"><h3>MY REGISTRATION LINKS</h3>${owner?linkRowsFor(owner):'<div class="empty">LOGIN REQUIRED</div>'}</div><div class="card" style="margin-top:16px"><h3>PENDING REGISTRATIONS</h3>${pending.length?`<div class="table-wrap"><table><thead><tr><th>NAME</th><th>ROLE</th><th>MEMBER ID</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody>${pending.map(m=>`<tr><td>${esc(nameOf(m))}</td><td>${esc(roleOf(m))}</td><td>${esc(idOf(m))}</td><td>PENDING</td><td><button class="btn small green" onclick="approveMember('${String(m.id)}')">APPROVE</button> <button class="btn small red" onclick="rejectMember('${String(m.id)}')">REJECT</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">NO PENDING REGISTRATIONS</div>'}</div></div>`;
 },
-  idcard:async c=>{const aa=await all('members'),ms=scopeMembers(aa),me=ms.find(m=>Number(m.id)===Number(state.user.id))||ms[0];c.innerHTML=`<div class="card"><div class="section-title"><h3>MEMBER ID CARDS</h3><button class="btn green" onclick="printIDPair()">PRINT ID CARD</button></div><div class="field"><label>SELECT MEMBER</label><select id="idMemberSelect" onchange="renderSelectedIDCard()">${ms.map(m=>`<option value="${m.id}" ${me&&Number(m.id)===Number(me.id)?'selected':''}>${esc(m.name)} • ${esc(m.memberId)}</option>`).join('')}</select></div><div id="idPrint" style="margin-top:16px"></div></div>`;if(ms.length)await renderSelectedIDCard()},
+  idcard:async c=>{await syncCloudMembersToLocal(); const aa=await all('members'),ms=scopeMembers(aa),me=ms.find(m=>Number(m.id)===Number(state.user.id))||ms.find(m=>String(m.cloudId||'')===String(state.user.cloudId||''))||ms[0];c.innerHTML=`<div class="card"><div class="section-title"><h3>MEMBER ID CARDS</h3><button class="btn green" onclick="printIDPair()">PRINT ID CARD</button></div><div class="field"><label>SELECT MEMBER</label><select id="idMemberSelect" onchange="renderSelectedIDCard()">${ms.map(m=>`<option value="${m.id}" ${me&&Number(m.id)===Number(me.id)?'selected':''}>${esc(m.name)} • ${esc(m.memberId)}</option>`).join('')}</select></div><div id="idPrint" style="margin-top:16px"></div></div>`;if(ms.length)await renderSelectedIDCard()},
  products:async c=>{const ps=await all('products');c.innerHTML=`<div class="card"><div class="section-title"><h3>Products (${ps.length})</h3><button class="btn green" onclick="openProductForm()">+ Add Product</button></div><div class="table-wrap"><table><thead><tr><th>Name</th><th>SKU</th><th>Selling Price</th><th>GST</th><th>Commission Base</th><th>Status</th><th></th></tr></thead><tbody>${ps.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.sku)}</td><td>${money(p.price)}</td><td>${money(p.gst)}</td><td>${money(p.base)}</td><td>${esc(p.status)}</td><td><button class="btn small" onclick="openProductForm(${p.id})">Edit</button> <button class="btn small red" onclick="deleteProduct(${p.id})">Delete</button></td></tr>`).join('')}</tbody></table></div></div>`},
  sales:async c=>{const aa=await all('members'),ms=scopeMembers(aa),ss=(await all('sales')).filter(x=>ms.some(m=>m.id===x.sellerId));c.innerHTML=`<div class="card"><div class="section-title"><h3>Sales (${ss.length})</h3><button class="btn green" onclick="openSaleForm()">+ Record Sale</button></div><div class="table-wrap"><table><thead><tr><th>Sale ID / Date</th><th>SELLER NAME</th><th>MEMBER ID</th><th>ID CARD</th><th>Customer</th><th>Product</th><th>Total</th><th>Gross Commission</th><th>TDS</th><th>NET PAYABLE COMMISSION</th><th>Status</th></tr></thead><tbody>${ss.sort((a,b)=>b.id-a.id).map(x=>`<tr><td>${esc(x.saleId)}<br><small>${esc(x.date)}</small></td><td><b>${esc(memberName(x.sellerId,aa))}</b></td><td>${esc(memberMemberId(x.sellerId,aa))}</td><td><button class="btn small light" onclick="openMemberIDCard(${x.sellerId})">VIEW ID CARD</button></td><td>${esc(x.customerName)}<br>${esc(x.customerMobile)}</td><td>${esc(x.productName)} × ${x.quantity}</td><td>${money(x.total)}</td><td>${money(x.commission)}</td><td>${money(x.tds)}</td><td><b>${money(netPayable(x))}</b></td><td><span class="badge active">${esc(x.status)}</span></td></tr>`).join('')}</tbody></table></div></div>`},
  ledger:async c=>{const aa=await all('members'),ms=scopeMembers(aa),ss=(await all('sales')).filter(x=>ms.some(m=>m.id===x.sellerId));c.innerHTML=`<div class="card"><div class="section-title"><h3>Commission Ledger</h3></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Sale</th><th>SELLER NAME</th><th>MEMBER ID</th><th>ID CARD</th><th>Base</th><th>Gross Commission</th><th>TDS</th><th>NET PAYABLE COMMISSION</th><th>Status</th></tr></thead><tbody>${ss.sort((a,b)=>b.id-a.id).map(x=>`<tr><td>${x.date}</td><td>${x.saleId}</td><td><b>${esc(memberName(x.sellerId,aa))}</b></td><td>${esc(memberMemberId(x.sellerId,aa))}</td><td><button class="btn small light" onclick="openMemberIDCard(${x.sellerId})">VIEW ID CARD</button></td><td>${money(x.base)}</td><td>${money(x.commission)}</td><td>${money(x.tds)}</td><td><b>${money(netPayable(x))}</b></td><td>${x.payoutId?'PAID':'UNPAID'}</td></tr>`).join('')}</tbody></table></div></div>`},
@@ -647,95 +732,63 @@ async function savePublicMember(e){
   window.__publicSaving=true;
   const submitBtn=form.querySelector('button[type=submit],button:not([type])');
   const oldBtnText=submitBtn?submitBtn.textContent:'';
-  const reset=()=>{window.__publicSaving=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=oldBtnText;}};
-  const fail=msg=>{reset();toast(String(msg||'REGISTRATION SUBMISSION FAILED'));};
-  try{
-    if(submitBtn){submitBtn.disabled=true;submitBtn.textContent='SUBMITTING…';}
-    const f=new FormData(form),pub=window.__publicRegistration;
-    if(!pub)return fail('INVALID REGISTRATION SESSION');
-    const name=String(f.get('name')||'').trim().toUpperCase();
-    const email=String(f.get('email')||'').trim().toLowerCase();
-    const password=String(f.get('password')||'').trim();
-    const mobile=String(f.get('mobile')||'').replace(/\D/g,'');
-    if(!name)return fail('FULL NAME IS REQUIRED');
-    if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return fail('VALID EMAIL IS REQUIRED');
-    if(!/^[6-9][0-9]{9}$/.test(mobile))return fail('MOBILE MUST BE EXACTLY 10 DIGITS');
-    if(password.length<8)return fail('PASSWORD MUST BE AT LEAST 8 CHARACTERS');
-    if(!f.get('declaration'))return fail('DECLARATION IS REQUIRED');
-
-    const requiredDocs=['photo','signature','aadhaarDoc','panDoc','cheque'];
-    const files={};
-    for(const k of requiredDocs){
-      const file=f.get(k);
-      if(!file||!file.size)return fail(k==='aadhaarDoc'?'AADHAAR DOCUMENT IS REQUIRED':k==='panDoc'?'PAN DOCUMENT IS REQUIRED':k==='cheque'?'CANCELLED CHEQUE / BANK DOCUMENT IS REQUIRED':k==='signature'?'SIGNATURE IS REQUIRED':'PHOTO IS REQUIRED');
-      const ok=(k==='photo'||k==='signature')?file.type.startsWith('image/'):(file.type.startsWith('image/')||file.type==='application/pdf');
-      if(!ok)return fail('INVALID FILE TYPE FOR '+k.toUpperCase());
-      if(file.size>5*1024*1024)return fail(k.toUpperCase()+' MUST BE 5 MB OR LESS');
-      files[k]=file;
-    }
-    const pan=String(f.get('pan')||'').trim().toUpperCase();if(pan&&!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan))return fail('PAN MUST BE 10 CHARACTERS: 5 LETTERS + 4 NUMBERS + 1 LETTER');
-    const pin=String(f.get('pin')||'').replace(/\D/g,'');if(pin&&!/^[0-9]{6}$/.test(pin))return fail('PIN CODE MUST BE EXACTLY 6 DIGITS');
-    const aadhaar4=String(f.get('aadhaar4')||'').replace(/\D/g,'');if(aadhaar4&&!/^[0-9]{4}$/.test(aadhaar4))return fail('AADHAAR LAST 4 MUST BE 4 DIGITS');
-    const ifsc=String(f.get('ifsc')||'').trim().toUpperCase();if(ifsc&&!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc))return fail('IFSC MUST BE 11 CHARACTERS: 4 LETTERS + 0 + 6 ALPHANUMERIC');
-
-    // Create/verify the Auth identity first. The DB RPC never trusts a role or parent from the browser.
-    let authData=null;
-    let authError=null;
-    ({data:authData,error:authError}=await window.careerNestSupabase.auth.signUp({email,password}));
-    let authUser=authData?.user||null;
-    if(authError){
-      const msg=String(authError.message||'');
-      if(/already|registered|user already exists/i.test(msg)){
-        const retry=await window.careerNestSupabase.auth.signInWithPassword({email,password});
-        if(retry.error)return fail('EMAIL ALREADY REGISTERED — USE A NEW EMAIL OR THE SAME EMAIL/PASSWORD USED FOR THIS PENDING REGISTRATION');
-        authUser=retry.data?.user||null;
-      }else return fail(msg);
-    }
-    if(!authUser?.id)return fail('AUTHENTICATION USER WAS NOT CREATED');
-
-    // Keep RPC payload small: images are resized/compressed in-browser; PDFs are only base64 encoded.
-    const docs={};
-    for(const k of requiredDocs){
-      const file=files[k];
-      docs[k]=await readRegistrationFile(file,k);
-    }
-    const payload={
-      member_id:uid('CN'),full_name:name,name,father:String(f.get('father')||'').trim().toUpperCase(),father_name:String(f.get('father')||'').trim().toUpperCase(),
-      dob:String(f.get('dob')||'').trim(),mobile,email,address:String(f.get('address')||'').trim().toUpperCase(),
-      state:String(f.get('state')||'').trim().toUpperCase(),state_name:String(f.get('state')||'').trim().toUpperCase(),district:String(f.get('district')||'').trim().toUpperCase(),district_name:String(f.get('district')||'').trim().toUpperCase(),city:String(f.get('city')||'').trim().toUpperCase(),pin,pan,aadhaar4:aadhaar4,
-      account_name:String(f.get('accountName')||'').trim().toUpperCase(),accountName:String(f.get('accountName')||'').trim().toUpperCase(),bank:String(f.get('bank')||'').trim().toUpperCase(),account_no:String(f.get('accountNo')||'').trim(),accountNo:String(f.get('accountNo')||'').trim(),ifsc,
-      commission_type:String(f.get('commissionType')||'PERCENTAGE').trim().toUpperCase(),commissionType:String(f.get('commissionType')||'PERCENTAGE').trim().toUpperCase(),commission_value:Number(f.get('commissionValue')||0),commissionValue:Number(f.get('commissionValue')||0),target_amount:Number(f.get('targetAmount')||0),targetAmount:Number(f.get('targetAmount')||0),
-      joining_date:String(f.get('joiningDate')||new Date().toISOString().slice(0,10)),joiningDate:String(f.get('joiningDate')||new Date().toISOString().slice(0,10)),status:'PENDING',auth_user_id:authUser.id,...docs
-    };
-    if(submitBtn)submitBtn.textContent='SAVING REGISTRATION…';
-    const rpcPromise=window.careerNestSupabase.rpc('public_register_member',{p_owner_id:String(pub.ownerId),p_target_role:String(pub.targetRole),p_auth_user_id:String(authUser.id),p_payload:payload});
-    const timeout=new Promise((_,rej)=>setTimeout(()=>rej(new Error('REGISTRATION SAVE TIMED OUT. PLEASE TRY AGAIN WITH SMALLER DOCUMENT FILES.')),45000));
-    const {data:newMember,error:insertError}=await Promise.race([rpcPromise,timeout]);
-    if(insertError)throw new Error(insertError.message||'REGISTRATION SUBMISSION FAILED');
-    if(!newMember)throw new Error('REGISTRATION WAS NOT SAVED');
-    try{await window.careerNestSupabase.auth.signOut();}catch(_){}
-    window.__publicRegistration=null;
-    const box=document.getElementById('publicRegistration');
-    if(box)box.innerHTML=`<div class="login-card" style="max-width:720px;width:95%"><div class="brand"><h1>CAREER NEST</h1><p>REGISTRATION SUBMITTED</p></div><div class="card"><h3>REGISTRATION RECEIVED</h3><p>Your registration has been submitted successfully and is pending approval.</p><p><b>MEMBER ID:</b> ${esc(newMember?.member_id||newMember?.memberId||payload.member_id)}</p><p class="hint">Your login will be available after the registration is approved and email verification requirements are completed.</p></div><button class="btn" onclick="location.href=location.href.split('?')[0]">GO TO LOGIN</button></div>`;
-  }catch(err){
-    console.error('PUBLIC REGISTRATION FAILED',err);
-    try{await window.careerNestSupabase?.auth?.signOut();}catch(_){}
-    fail(err?.message||'REGISTRATION SUBMISSION FAILED');
+  if(submitBtn){submitBtn.disabled=true;submitBtn.textContent='SUBMITTING…';}
+  const f=new FormData(form),pub=window.__publicRegistration;
+  if(!pub){window.__publicSaving=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=oldBtnText;}return toast('INVALID REGISTRATION SESSION');}
+  const name=String(f.get('name')||'').trim().toUpperCase();
+  const email=String(f.get('email')||'').trim().toLowerCase();
+  const password=String(f.get('password')||'').trim();
+  const mobile=String(f.get('mobile')||'').replace(/\D/g,'');
+  if(!name)return toast('FULL NAME IS REQUIRED');
+  if(!email||!email.includes('@'))return toast('VALID EMAIL IS REQUIRED');
+  if(!/^[6-9][0-9]{9}$/.test(mobile))return toast('MOBILE MUST BE EXACTLY 10 DIGITS');
+  if(password.length<8)return toast('PASSWORD MUST BE AT LEAST 8 CHARACTERS');
+  if(!f.get('declaration'))return toast('DECLARATION IS REQUIRED');
+  const requiredDocs=['photo','signature','aadhaarDoc','panDoc','cheque'];
+  for(const k of requiredDocs){
+    const file=f.get(k);
+    if(!file||!file.size)return toast(k==='aadhaarDoc'?'AADHAAR DOCUMENT IS REQUIRED':k==='panDoc'?'PAN DOCUMENT IS REQUIRED':k==='cheque'?'CANCELLED CHEQUE / BANK DOCUMENT IS REQUIRED':k==='signature'?'SIGNATURE IS REQUIRED':'PHOTO IS REQUIRED');
+    const ok=(k==='photo'||k==='signature')?file.type.startsWith('image/'):(file.type.startsWith('image/')||file.type==='application/pdf');
+    if(!ok)return toast('INVALID FILE TYPE FOR '+k.toUpperCase());
+    if(file.size>5*1024*1024)return toast(k.toUpperCase()+' MUST BE 5 MB OR LESS');
   }
-}
-
-async function readRegistrationFile(file,key){
-  if(file.type==='application/pdf')return readFile(file);
-  try{
-    const dataUrl=await readFile(file);
-    const img=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=dataUrl;});
-    const max=key==='signature'?1000:1400;
-    const scale=Math.min(1,max/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height));
-    const w=Math.max(1,Math.round((img.naturalWidth||img.width)*scale)),h=Math.max(1,Math.round((img.naturalHeight||img.height)*scale));
-    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
-    const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,w,h);
-    return canvas.toDataURL('image/jpeg',key==='signature'?0.72:0.78);
-  }catch(_){return readFile(file);}
+  const pan=String(f.get('pan')||'').trim().toUpperCase();if(pan&&!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan))return toast('PAN MUST BE 10 CHARACTERS: 5 LETTERS + 4 NUMBERS + 1 LETTER');
+  const pin=String(f.get('pin')||'').replace(/\D/g,'');if(pin&&!/^[0-9]{6}$/.test(pin))return toast('PIN CODE MUST BE EXACTLY 6 DIGITS');
+  const aad=String(f.get('aadhaar4')||'').replace(/\D/g,'');if(aad&&!/^[0-9]{4}$/.test(aad))return toast('AADHAAR LAST 4 MUST BE 4 DIGITS');
+  const ifsc=String(f.get('ifsc')||'').trim().toUpperCase();if(ifsc&&!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc))return toast('IFSC MUST BE 11 CHARACTERS: 4 LETTERS + 0 + 6 ALPHANUMERIC');
+  const {data:authData,error:authError}=await window.careerNestSupabase.auth.signUp({email,password});
+  if(authError){
+    window.__publicSaving=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=oldBtnText;}
+    const msg=String(authError.message||'').toLowerCase();
+    return toast(msg.includes('already')||msg.includes('registered')?'EMAIL ALREADY REGISTERED':authError.message);
+  }
+  const authUser=authData?.user;
+  if(!authUser){
+    window.__publicSaving=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=oldBtnText;}
+    return toast('AUTHENTICATION USER WAS NOT CREATED');
+  }
+  const docs={};
+  for(const k of requiredDocs){const file=f.get(k);if(file&&file.size)docs[k]=await readFile(file);}
+  const payload={
+    member_id:uid('CN'),full_name:name,name,father:String(f.get('father')||'').trim().toUpperCase(),father_name:String(f.get('father')||'').trim().toUpperCase(),
+    dob:String(f.get('dob')||'').trim(),mobile,email,address:String(f.get('address')||'').trim().toUpperCase(),
+    state:String(f.get('state')||'').trim().toUpperCase(),state_name:String(f.get('state')||'').trim().toUpperCase(),
+    district:String(f.get('district')||'').trim().toUpperCase(),district_name:String(f.get('district')||'').trim().toUpperCase(),city:String(f.get('city')||'').trim().toUpperCase(),pin,pan,aadhaar4,
+    account_name:String(f.get('accountName')||'').trim().toUpperCase(),accountName:String(f.get('accountName')||'').trim().toUpperCase(),
+    bank:String(f.get('bank')||'').trim().toUpperCase(),account_no:String(f.get('accountNo')||'').trim(),accountNo:String(f.get('accountNo')||'').trim(),ifsc,
+    commission_type:String(f.get('commissionType')||'PERCENTAGE').trim().toUpperCase(),commissionType:String(f.get('commissionType')||'PERCENTAGE').trim().toUpperCase(),
+    commission_value:Number(f.get('commissionValue')||0),commissionValue:Number(f.get('commissionValue')||0),
+    target_amount:Number(f.get('targetAmount')||0),targetAmount:Number(f.get('targetAmount')||0),
+    joining_date:String(f.get('joiningDate')||new Date().toISOString().slice(0,10)),joiningDate:String(f.get('joiningDate')||new Date().toISOString().slice(0,10)),
+    status:'PENDING',auth_user_id:authUser.id,
+    ...docs
+  };
+  const {data:newMember,error:insertError}=await window.careerNestSupabase.rpc('public_register_member',{p_owner_id:String(pub.ownerId),p_target_role:String(pub.targetRole),p_auth_user_id:String(authUser.id),p_payload:payload});
+  if(insertError){try{await window.careerNestSupabase.auth.signOut();}catch(_){}window.__publicSaving=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=oldBtnText;}return toast(insertError.message||'REGISTRATION SUBMISSION FAILED');}
+  try{await window.careerNestSupabase.auth.signOut();}catch(_){}
+  window.__publicRegistration=null;
+  const box=document.getElementById('publicRegistration');
+  if(box){box.innerHTML=`<div class="login-card" style="max-width:720px;width:95%"><div class="brand"><h1>CAREER NEST</h1><p>REGISTRATION SUBMITTED</p></div><div class="card"><h3>REGISTRATION RECEIVED</h3><p>Your registration has been submitted successfully and is pending approval.</p><p><b>MEMBER ID:</b> ${esc(newMember?.member_id||newMember?.memberId||payload.member_id)}</p><p class="hint">Your login will be available after the registration is approved and email verification requirements are completed.</p></div><button class="btn" onclick="location.href=location.href.split('?')[0]">GO TO LOGIN</button></div>`;}
 }
 
 function decodeRegistrationToken(raw){
@@ -995,7 +1048,7 @@ async function saveMember(e){
  if(aa.some(x=>x.id!==id&&String(x.mobile||'').replace(/\D/g,'')===mobile))return toast('MOBILE ALREADY EXISTS');
  const pan=String(f.get('pan')||'').trim().toUpperCase();if(pan&&!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan))return toast('PAN MUST BE 10 CHARACTERS: 5 LETTERS + 4 NUMBERS + 1 LETTER');
  const pin=String(f.get('pin')||'').replace(/\D/g,'');if(pin&&!/^[0-9]{6}$/.test(pin))return toast('PIN CODE MUST BE EXACTLY 6 DIGITS');
- const aadhaar4=String(f.get('aadhaar4')||'').replace(/\D/g,'');if(aadhaar4&&!/^[0-9]{4}$/.test(aadhaar4))return toast('AADHAAR LAST 4 MUST BE 4 DIGITS');
+ const aad=String(f.get('aadhaar4')||'').replace(/\D/g,'');if(aad&&!/^[0-9]{4}$/.test(aad))return toast('AADHAAR LAST 4 MUST BE 4 DIGITS');
  const ifsc=String(f.get('ifsc')||'').trim().toUpperCase();if(ifsc&&!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc))return toast('IFSC MUST BE 11 CHARACTERS: 4 LETTERS + 0 + 6 ALPHANUMERIC');
  const requiredDocs=['photo','signature','aadhaarDoc','panDoc','cheque'];
 if(!id){
@@ -1012,7 +1065,7 @@ const password=String(f.get('password')||'').trim();if(!id&&password.length<8)re
  if(parentId&&type==='PERCENTAGE'){const p=aa.find(x=>x.id===parentId),pm=rootPM(p,aa);if(pm){const used=allocationForPM(pm.id,aa,id);if(used+val>Number(pm.commissionValue||0)+1e-9)return toast('TEAM COMMISSION ALLOCATION CANNOT EXCEED PM COMMISSION POOL')}}
  const o=old?{...old}:{memberId:uid('CN'),createdAt:new Date().toISOString()};
  ['name','father','dob','address','state','district','city','accountName','bank','accountNo','role','status','joiningDate','commissionType'].forEach(k=>o[k]=String(f.get(k)||'').trim().toUpperCase());
- o.mobile=mobile;o.email=email;o.pan=pan;o.pin=pin;o.aadhaar4=aadhaar4;o.ifsc=ifsc;o.targetAmount=Number(f.get('targetAmount')||0);o.password=(password || old?.password || (isAdmin() ? 'Admin@123' : 'ChangeMe@123'));o.parentId=parentId;o.commissionValue=val;
+ o.mobile=mobile;o.email=email;o.pan=pan;o.pin=pin;o.aadhaar4=aad;o.ifsc=ifsc;o.targetAmount=Number(f.get('targetAmount')||0);o.password=(password || old?.password || (isAdmin() ? 'Admin@123' : 'ChangeMe@123'));o.parentId=parentId;o.commissionValue=val;
  for(const k of ['photo','signature','aadhaarDoc','panDoc','cheque']){const file=f.get(k);if(file&&file.size)o[k]=await readFile(file)}
  if(!id) o.status = pub ? 'PENDING' : (isAdmin() ? 'ACTIVE' : 'PENDING');
  await put('members',o);
@@ -1027,7 +1080,7 @@ const password=String(f.get('password')||'').trim();if(!id&&password.length<8)re
  }
  closeModal();
  toast(id?'MEMBER UPDATED':'MEMBER REGISTERED');
- if(state.user && state.user.id){ state.user=await get('members',state.user.id); sessionStorage.setItem('cn_user',JSON.stringify(state.user)); }
+ if(state.user && state.user.id){ const lm=await get('members',state.user.id); if(lm) state.user={...state.user,...lm}; sessionStorage.setItem('cn_user',JSON.stringify(state.user)); }
  go(state.page);
 }
 async function readFile(f){if(!f)return null;return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(f)})}
@@ -1045,7 +1098,7 @@ async function openProductForm(id=null){
  document.getElementById('modal').classList.add('show');document.getElementById('productForm').onsubmit=async e=>{e.preventDefault();try{const f=new FormData(e.target),o={name:String(f.get('name')||'').trim(),sku:String(f.get('sku')||'').trim(),price:Number(f.get('price')||0),gst:Number(f.get('gst')||0),base:Number(f.get('base')||0),status:String(f.get('status')||'ACTIVE'),description:String(f.get('description')||'')};const rawId=String(f.get('id')||'').trim();if(rawId)o.id=Number(rawId);await put('products',o);await audit('PRODUCT_SAVED',o.sku);closeModal();toast(id?'PRODUCT UPDATED SUCCESSFULLY':'PRODUCT SAVED SUCCESSFULLY');go('products')}catch(err){console.error(err);toast('PRODUCT SAVE FAILED: '+(err?.message||err))}}
 }
 async function openSaleForm(){
- const aa=await all('members'),ms=scopeMembers(aa).filter(m=>m.status==='ACTIVE'&&m.role!=='SUPER ADMIN'),ps=await all('products');
+ await syncCloudMembersToLocal(); const aa=await all('members'),scope=scopeMembers(aa); const me=aa.find(m=>String(m.cloudId||'')===String(state.user.cloudId||''))||aa.find(m=>Number(m.id)===Number(state.user.id)); const ms=[...scope.filter(m=>m.status==='ACTIVE'&&m.role!=='SUPER ADMIN')]; if(me&&me.status==='ACTIVE'&&me.role!=='SUPER ADMIN'&&!ms.some(x=>Number(x.id)===Number(me.id)))ms.unshift(me); const ps=await all('products');
  document.getElementById('modalTitle').textContent='Record Sale';document.getElementById('modalBody').innerHTML=`<form id="saleForm" class="form-grid">
  <div class="field"><label>Seller</label><select name="sellerId" required>${ms.map(m=>`<option value="${m.id}" ${m.id===state.user.id?'selected':''}>${esc(m.name)} • ${esc(m.memberId)}</option>`).join('')}</select></div>
  <div class="field"><label>Product</label><select name="productId" required>${ps.filter(p=>p.status==='ACTIVE').map(p=>`<option value="${p.id}">${esc(p.name)} — ${money(p.price)}</option>`).join('')}</select></div>
