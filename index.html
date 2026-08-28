@@ -1,3 +1,4 @@
+<!-- CAREER NEST CRM V25 FINAL -->
 <!-- CAREER NEST CRM V24.8 FINAL PM DIRECT SALES + ID CARD -->
 <!-- CAREER NEST CRM V24.7 FINAL ONLINE MEMBER SALES + ID CARD -->
 <!-- CAREER NEST CRM V24.3 FINAL -->
@@ -269,12 +270,13 @@ input:not([type="email"]):not([type="password"]), textarea, select {
 <style>input:not([type='email']):not([type='password']),textarea,select{text-transform:uppercase}</style><style>
 #memberForm input:not([type="email"]):not([type="password"]),#memberForm textarea,#memberForm select{text-transform:uppercase}
 #memberForm input[name="mobile"],#memberForm input[name="pin"],#memberForm input[name="aadhaar4"]{text-transform:none}
-</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script>
 // V24: public registration uses Supabase RPCs; no IndexedDB is initialized on registration links.
 window.CAREER_NEST_SUPABASE_URL = "https://muonxagfjtjokbksnyqa.supabase.co";
 window.CAREER_NEST_SUPABASE_KEY = "sb_publishable_CYw3LeMYmt9x3d8k3vecKw_Q2kvO6Uv";
 window.careerNestSupabase = window.supabase.createClient(window.CAREER_NEST_SUPABASE_URL, window.CAREER_NEST_SUPABASE_KEY);
+window.CAREER_NEST_REGISTRATION_EMAIL_TO="anubhavcrmcd@gmail.com";window.CAREER_NEST_REGISTRATION_EMAIL_FUNCTION=window.CAREER_NEST_REGISTRATION_EMAIL_FUNCTION||(window.CAREER_NEST_SUPABASE_URL+"/functions/v1/send-registration-email");
 </script>
 </head>
 <body>
@@ -420,81 +422,22 @@ function localMemberId(){
   return ms?null:null;
 }
 async function syncCloudMembersToLocal(){
-  if(!window.careerNestSupabase||!state.db)return;
-  try{
-    const {data,error}=await window.careerNestSupabase
-      .from('members')
-      .select('*, roles:role_id(code,name)')
-      .eq('status','ACTIVE');
-    if(error||!Array.isArray(data))return;
-
-    const local=await all('members');
-    const byCloud=new Map(local.filter(x=>x.cloudId).map(x=>[String(x.cloudId),x]));
-    const byMemberId=new Map(local.filter(x=>x.memberId).map(x=>[String(x.memberId),x]));
-    const idMap=new Map();
-    let next=Math.max(0,...local.map(x=>Number(x.id)||0))+1;
-
-    // First assign stable local IDs for every cloud member.
-    for(const m of data){
-      const cloudId=String(m.id);
-      let row=byCloud.get(cloudId)||byMemberId.get(String(m.member_id));
-      if(!row){ row={id:next++,cloudId}; }
-      idMap.set(cloudId,row.id);
-    }
-
-    for(const m of data){
-      const row=byCloud.get(String(m.id))||byMemberId.get(String(m.member_id))||{id:idMap.get(String(m.id)),cloudId:String(m.id)};
-      const roleCode=normalizeRoleCode(Array.isArray(m.roles)?(m.roles[0]?.code||'MEMBER'):(m.roles?.code||'MEMBER'));
-      const parentLocal=m.parent_member_id ? (byMemberId.get(String(data.find(x=>String(x.id)===String(m.parent_member_id))?.member_id||''))?.id || idMap.get(String(m.parent_member_id)) || null) : null;
-      const merged={
-        ...row,
-        cloudId:String(m.id),
-        authUserId:m.auth_user_id||'',
-        memberId:m.member_id||'',
-        name:m.full_name||m.name||'',
-        full_name:m.full_name||'',
-        role:roleCode,
-        role_id:m.role_id,
-        parentId:parentLocal,
-        parent_member_id:m.parent_member_id||null,
-        status:String(m.status||'ACTIVE').toUpperCase(),
-        email:m.email||'',
-        mobile:m.mobile||'',
-        father:m.father_name||m.father||'',
-        dob:m.dob||'',
-        address:m.address||'',
-        state:m.state_name||m.state||'',
-        district:m.district_name||m.district||'',
-        city:m.city_name||m.city||'',
-        pin:m.pin_code||m.pin||'',
-        pan:m.pan||'',
-        aadhaar4:m.aadhaar_last4||m.aadhaar4||'',
-        accountName:m.account_name||m.accountName||'',
-        bank:m.bank_name||m.bank||'',
-        accountNo:m.account_no||m.accountNo||'',
-        ifsc:m.ifsc||'',
-        photo:m.photo||'',
-        aadhaarDoc:m.aadhaar_doc||m.aadhaarDoc||'',
-        panDoc:m.pan_doc||m.panDoc||'',
-        cheque:m.cheque||'',
-        signature:m.signature||'',
-        joiningDate:m.joining_date||m.joiningDate||'',
-        commissionType:m.commission_type||m.commissionType||'PERCENTAGE',
-        commissionValue:Number(m.commission_value??m.commissionValue??0),
-        targetAmount:Number(m.target_amount??m.targetAmount??0),
-        createdAt:m.created_at||m.createdAt||new Date().toISOString()
-      };
-      await put('members',merged);
-      if(state.user && String(state.user.cloudId||state.user.id)===String(m.id)){
-        state.user={...state.user,...merged,id:merged.id};
-      }
-    }
-    return true;
-  }catch(err){
-    console.warn('Cloud member sync skipped:',err);
-    return false;
-  }
+ if(!window.careerNestSupabase||!state.db)return false;
+ try{
+  const {data,error}=await window.careerNestSupabase.from('members').select('*, roles:role_id(code,name)').eq('status','ACTIVE').order('created_at',{ascending:true});
+  if(error)throw error;
+  const local=await all('members'),bc=new Map(local.filter(x=>x.cloudId).map(x=>[String(x.cloudId),x])),bm=new Map(local.filter(x=>x.memberId).map(x=>[String(x.memberId),x]));
+  let next=Math.max(0,...local.map(x=>Number(x.id)||0))+1;const ids=new Map(),cloud=new Map((data||[]).map(x=>[String(x.id),x]));
+  for(const m of(data||[])){const old=bc.get(String(m.id))||bm.get(String(m.member_id));ids.set(String(m.id),old?.id||next++);}
+  for(const m of(data||[])){const old=bc.get(String(m.id))||bm.get(String(m.member_id))||{},p=m.parent_member_id?cloud.get(String(m.parent_member_id)):null;
+   await put('members',{...old,id:ids.get(String(m.id)),cloudId:String(m.id),authUserId:m.auth_user_id||'',memberId:m.member_id||'',name:m.full_name||m.name||'',full_name:m.full_name||m.name||'',role:normalizeRoleCode(m.roles?.code||m.roles?.name||m.role||'MEMBER'),role_id:m.role_id,parentId:p?ids.get(String(p.id)):null,parent_member_id:m.parent_member_id||null,status:String(m.status||'ACTIVE').toUpperCase(),email:m.email||'',mobile:m.mobile||'',father:m.father_name||m.father||'',dob:m.dob||'',address:m.address||'',state:m.state_name||m.state||'',district:m.district_name||m.district||'',city:m.city_name||m.city||'',pin:m.pin_code||m.pin||'',pan:m.pan||'',aadhaar4:m.aadhaar_last4||m.aadhaar4||'',accountName:m.account_name||m.accountName||'',bank:m.bank_name||m.bank||'',accountNo:m.account_no||m.accountNo||'',ifsc:m.ifsc||'',photo:m.photo||'',aadhaarDoc:m.aadhaar_doc||m.aadhaarDoc||'',panDoc:m.pan_doc||m.panDoc||'',cheque:m.cheque||'',signature:m.signature||'',joiningDate:m.joining_date||m.joiningDate||'',commissionType:m.commission_type||m.commissionType||'PERCENTAGE',commissionValue:Number(m.commission_value??m.commissionValue??0),targetAmount:Number(m.target_amount??m.targetAmount??0),createdAt:m.created_at||new Date().toISOString()});
+  }return true;
+ }catch(e){console.error(e);return false}
 }
+async function fetchOnlineMembers(){const {data,error}=await window.careerNestSupabase.from('members').select('*, roles:role_id(code,name)').eq('status','ACTIVE').order('created_at',{ascending:true});if(error)throw error;return data||[]}
+function cloudLocal(m){return {...m,id:Math.abs(hashString(String(m.id)))+1,cloudId:String(m.id),memberId:m.member_id||'',name:m.full_name||m.name||'',role:normalizeRoleCode(m.roles?.code||m.roles?.name||m.role||'MEMBER'),status:String(m.status||'ACTIVE').toUpperCase()}}
+function hashString(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+async function openOnlineMemberIDCard(id){try{const {data,error}=await window.careerNestSupabase.from('members').select('*, roles:role_id(code,name)').eq('id',String(id)).maybeSingle();if(error)throw error;if(!data)return toast('MEMBER NOT FOUND');const m=cloudLocal(data);document.getElementById('modalTitle').textContent='MEMBER ID CARD';document.getElementById('modalBody').innerHTML=`<div class="actions"><button class="btn green" onclick="printIDPair()">PRINT ID CARD</button></div><div id="idPrint">${idCardPairHTML(m,[m])}</div>`;document.getElementById('modal').classList.add('show')}catch(e){toast('ID CARD LOAD FAILED: '+(e.message||e))}}
 
 async function audit(action,recordId='',details=''){await put('audit',{user:state.user?.memberId||'SYSTEM',action,recordId,details,dateTime:new Date().toISOString(),ip:'LOCAL'})}
 async function settings(){const x=await all('settings');return x[0]||{tds:5}}
@@ -671,7 +614,8 @@ registration:async c=>{
   const roleOf=m=>m.roles?.code||'MEMBER',nameOf=m=>m.full_name||m.name||'—',idOf=m=>m.member_id||'—';
   c.innerHTML=`<div class="card"><div class="section-title"><div><h3>NEW REGISTRATION</h3><div class="hint">ONLINE REGISTRATION LINKS AND PENDING REGISTRATIONS</div></div><button class="btn green" onclick="openMemberForm()">+ NEW REGISTRATION</button></div><div class="card" style="padding:14px"><h3>MY REGISTRATION LINKS</h3>${owner?linkRowsFor(owner):'<div class="empty">LOGIN REQUIRED</div>'}</div><div class="card" style="margin-top:16px"><h3>PENDING REGISTRATIONS</h3>${pending.length?`<div class="table-wrap"><table><thead><tr><th>NAME</th><th>ROLE</th><th>MEMBER ID</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody>${pending.map(m=>`<tr><td>${esc(nameOf(m))}</td><td>${esc(roleOf(m))}</td><td>${esc(idOf(m))}</td><td>PENDING</td><td><button class="btn small green" onclick="approveMember('${String(m.id)}')">APPROVE</button> <button class="btn small red" onclick="rejectMember('${String(m.id)}')">REJECT</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">NO PENDING REGISTRATIONS</div>'}</div></div>`;
 },
-  idcard:async c=>{await syncCloudMembersToLocal(); const aa=await all('members'),ms=scopeMembers(aa),me=ms.find(m=>Number(m.id)===Number(state.user.id))||ms.find(m=>String(m.cloudId||'')===String(state.user.cloudId||''))||ms[0];c.innerHTML=`<div class="card"><div class="section-title"><h3>MEMBER ID CARDS</h3><button class="btn green" onclick="printIDPair()">PRINT ID CARD</button></div><div class="field"><label>SELECT MEMBER</label><select id="idMemberSelect" onchange="renderSelectedIDCard()">${ms.map(m=>`<option value="${m.id}" ${me&&Number(m.id)===Number(me.id)?'selected':''}>${esc(m.name)} • ${esc(m.memberId)}</option>`).join('')}</select></div><div id="idPrint" style="margin-top:16px"></div></div>`;if(ms.length)await renderSelectedIDCard()},
+  idcard:async c=>{try{const raw=await fetchOnlineMembers();let rows=raw.map(cloudLocal);if(!isAdmin()){const me=rows.find(m=>String(m.cloudId)===String(state.user?.cloudId||''));rows=me?[me]:[]}c.innerHTML=`<div class="card"><div class="section-title"><h3>MEMBER ID CARDS</h3><button class="btn green" onclick="printIDPair()">PRINT ID CARD</button></div><div class="field"><label>SELECT MEMBER</label><select id="idMemberSelect" onchange="renderSelectedIDCard()">${rows.map(m=>`<option value="${esc(m.cloudId)}">${esc(m.name)} • ${esc(m.memberId)} • ${esc(m.role)}</option>`).join('')}</select></div><div id="idPrint" style="margin-top:16px"></div></div>`;if(rows.length)await renderSelectedIDCard()}catch(e){c.innerHTML=`<div class="card"><div class="empty">ID CARD LOAD FAILED: ${esc(e.message||e)}</div></div>`}},
+
  products:async c=>{const ps=await all('products');c.innerHTML=`<div class="card"><div class="section-title"><h3>Products (${ps.length})</h3><button class="btn green" onclick="openProductForm()">+ Add Product</button></div><div class="table-wrap"><table><thead><tr><th>Name</th><th>SKU</th><th>Selling Price</th><th>GST</th><th>Commission Base</th><th>Status</th><th></th></tr></thead><tbody>${ps.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.sku)}</td><td>${money(p.price)}</td><td>${money(p.gst)}</td><td>${money(p.base)}</td><td>${esc(p.status)}</td><td><button class="btn small" onclick="openProductForm(${p.id})">Edit</button> <button class="btn small red" onclick="deleteProduct(${p.id})">Delete</button></td></tr>`).join('')}</tbody></table></div></div>`},
  sales:async c=>{const aa=await all('members'),ms=scopeMembers(aa),ss=(await all('sales')).filter(x=>ms.some(m=>m.id===x.sellerId));c.innerHTML=`<div class="card"><div class="section-title"><h3>Sales (${ss.length})</h3><button class="btn green" onclick="openSaleForm()">+ Record Sale</button></div><div class="table-wrap"><table><thead><tr><th>Sale ID / Date</th><th>SELLER NAME</th><th>MEMBER ID</th><th>ID CARD</th><th>Customer</th><th>Product</th><th>Total</th><th>Gross Commission</th><th>TDS</th><th>NET PAYABLE COMMISSION</th><th>Status</th></tr></thead><tbody>${ss.sort((a,b)=>b.id-a.id).map(x=>`<tr><td>${esc(x.saleId)}<br><small>${esc(x.date)}</small></td><td><b>${esc(memberName(x.sellerId,aa))}</b></td><td>${esc(memberMemberId(x.sellerId,aa))}</td><td><button class="btn small light" onclick="openMemberIDCard(${x.sellerId})">VIEW ID CARD</button></td><td>${esc(x.customerName)}<br>${esc(x.customerMobile)}</td><td>${esc(x.productName)} × ${x.quantity}</td><td>${money(x.total)}</td><td>${money(x.commission)}</td><td>${money(x.tds)}</td><td><b>${money(netPayable(x))}</b></td><td><span class="badge active">${esc(x.status)}</span></td></tr>`).join('')}</tbody></table></div></div>`},
  ledger:async c=>{const aa=await all('members'),ms=scopeMembers(aa),ss=(await all('sales')).filter(x=>ms.some(m=>m.id===x.sellerId));c.innerHTML=`<div class="card"><div class="section-title"><h3>Commission Ledger</h3></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Sale</th><th>SELLER NAME</th><th>MEMBER ID</th><th>ID CARD</th><th>Base</th><th>Gross Commission</th><th>TDS</th><th>NET PAYABLE COMMISSION</th><th>Status</th></tr></thead><tbody>${ss.sort((a,b)=>b.id-a.id).map(x=>`<tr><td>${x.date}</td><td>${x.saleId}</td><td><b>${esc(memberName(x.sellerId,aa))}</b></td><td>${esc(memberMemberId(x.sellerId,aa))}</td><td><button class="btn small light" onclick="openMemberIDCard(${x.sellerId})">VIEW ID CARD</button></td><td>${money(x.base)}</td><td>${money(x.commission)}</td><td>${money(x.tds)}</td><td><b>${money(netPayable(x))}</b></td><td>${x.payoutId?'PAID':'UNPAID'}</td></tr>`).join('')}</tbody></table></div></div>`},
@@ -726,6 +670,8 @@ async function getPublicRegistrationContext(ownerId,targetRole){
   return data;
 }
 
+async function buildRegistrationPDF(payload,docs,ctx){if(!window.PDFLib)throw new Error('PDF LIBRARY NOT LOADED');const {PDFDocument,StandardFonts,rgb}=window.PDFLib,pdf=await PDFDocument.create(),font=await pdf.embedFont(StandardFonts.Helvetica),bold=await pdf.embedFont(StandardFonts.HelveticaBold);let page=pdf.addPage([595.28,841.89]),y=800;const row=(a,b)=>{if(y<55){page=pdf.addPage([595.28,841.89]);y=800}page.drawText(a,{x:40,y,size:9,font:bold});page.drawText(String(b||'').replace(/\s+/g,' ').slice(0,160),{x:175,y,size:9,font});y-=17};page.drawText('CAREER NEST — REGISTRATION / KYC',{x:40,y,size:18,font:bold,color:rgb(.04,.14,.28)});y-=35;[['Member ID',payload.member_id],['Full Name',payload.full_name],['Father Name',payload.father_name],['DOB',payload.dob],['Mobile',payload.mobile],['Email',payload.email],['Address',payload.address],['State',payload.state_name],['District',payload.district_name],['City',payload.city],['PIN',payload.pin],['PAN',payload.pan],['Aadhaar Last 4',payload.aadhaar4],['Account Name',payload.account_name],['Bank',payload.bank],['Account No.',payload.account_no],['IFSC',payload.ifsc],['Role',ctx?.target_role],['Parent / Under',ctx?.owner_name]].forEach(x=>row(x[0],x[1]));for(const key of ['photo','signature','aadhaarDoc','panDoc','cheque']){const d=docs[key];if(!d)continue;const type=(d.match(/^data:([^;]+)/)||[])[1]||'';if(type==='application/pdf'){try{const raw=Uint8Array.from(atob(d.split(',')[1]),c=>c.charCodeAt(0)),src=await PDFDocument.load(raw);for(const cp of await pdf.copyPages(src,src.getPageIndices()))pdf.addPage(cp);continue}catch(_){}}if(type.startsWith('image/')){try{const raw=Uint8Array.from(atob(d.split(',')[1]),c=>c.charCodeAt(0)),img=type.includes('jpeg')?await pdf.embedJpg(raw):await pdf.embedPng(raw);if(y<340){page=pdf.addPage([595.28,841.89]);y=800}page.drawText(key.toUpperCase(),{x:40,y,size:10,font:bold});y-=15;const sc=Math.min(460/img.width,280/img.height,1);page.drawImage(img,{x:40,y:y-img.height*sc,width:img.width*sc,height:img.height*sc});y-=img.height*sc+25}catch(_){}}}const bytes=await pdf.save();let bin='';for(let i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(bin)}
+async function sendRegistrationEmail(member,payload,docs,ctx){try{const pdfBase64=await buildRegistrationPDF(payload,docs,ctx),r=await fetch(window.CAREER_NEST_REGISTRATION_EMAIL_FUNCTION,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:window.CAREER_NEST_REGISTRATION_EMAIL_TO,subject:`Career Nest Registration — ${member?.member_id||payload.member_id}`,filename:`Career-Nest-${member?.member_id||payload.member_id}.pdf`,pdfBase64,member,payload,context:ctx})});if(!r.ok)throw new Error(await r.text());return true}catch(e){console.error('Registration email failed',e);return false}}
 async function savePublicMember(e){
   e.preventDefault();
   const form=e.target;
@@ -789,7 +735,7 @@ async function savePublicMember(e){
   try{await window.careerNestSupabase.auth.signOut();}catch(_){}
   window.__publicRegistration=null;
   const box=document.getElementById('publicRegistration');
-  if(box){box.innerHTML=`<div class="login-card" style="max-width:720px;width:95%"><div class="brand"><h1>CAREER NEST</h1><p>REGISTRATION SUBMITTED</p></div><div class="card"><h3>REGISTRATION RECEIVED</h3><p>Your registration has been submitted successfully and is pending approval.</p><p><b>MEMBER ID:</b> ${esc(newMember?.member_id||newMember?.memberId||payload.member_id)}</p><p class="hint">Your login will be available after the registration is approved and email verification requirements are completed.</p></div><button class="btn" onclick="location.href=location.href.split('?')[0]">GO TO LOGIN</button></div>`;}
+  if(box){box.innerHTML=`<div class="login-card" style="max-width:720px;width:95%"><div class="brand"><h1>CAREER NEST</h1><p>REGISTRATION SUBMITTED</p></div><div class="card"><h3>REGISTRATION RECEIVED</h3><p>Your registration has been submitted successfully and is pending approval.</p><p><b>MEMBER ID:</b> ${esc(newMember?.member_id||newMember?.memberId||payload.member_id)}</p><p class="hint">${emailed?'Registration PDF + documents emailed to '+esc(window.CAREER_NEST_REGISTRATION_EMAIL_TO):'Registration saved, but email delivery is not configured or failed.'}</p></div><button class="btn" onclick="location.href=location.href.split('?')[0]">GO TO LOGIN</button></div>`;}
 }
 
 function decodeRegistrationToken(raw){
@@ -1098,17 +1044,8 @@ async function openProductForm(id=null){
  <div class="field full"><label>Description</label><textarea name="description">${esc(p.description)}</textarea></div><div class="field full"><button class="btn green">Save</button></div></form>`;
  document.getElementById('modal').classList.add('show');document.getElementById('productForm').onsubmit=async e=>{e.preventDefault();try{const f=new FormData(e.target),o={name:String(f.get('name')||'').trim(),sku:String(f.get('sku')||'').trim(),price:Number(f.get('price')||0),gst:Number(f.get('gst')||0),base:Number(f.get('base')||0),status:String(f.get('status')||'ACTIVE'),description:String(f.get('description')||'')};const rawId=String(f.get('id')||'').trim();if(rawId)o.id=Number(rawId);await put('products',o);await audit('PRODUCT_SAVED',o.sku);closeModal();toast(id?'PRODUCT UPDATED SUCCESSFULLY':'PRODUCT SAVED SUCCESSFULLY');go('products')}catch(err){console.error(err);toast('PRODUCT SAVE FAILED: '+(err?.message||err))}}
 }
-async function openSaleForm(){
- await syncCloudMembersToLocal(); const aa=await all('members'),scope=scopeMembers(aa); const me=aa.find(m=>String(m.cloudId||'')===String(state.user.cloudId||''))||aa.find(m=>Number(m.id)===Number(state.user.id)); const ms=[...scope.filter(m=>m.status==='ACTIVE'&&m.role!=='SUPER ADMIN')]; if(me&&me.status==='ACTIVE'&&me.role!=='SUPER ADMIN'&&!ms.some(x=>Number(x.id)===Number(me.id)))ms.unshift(me); const directSeller=me&&me.status==='ACTIVE'&&me.role!=='SUPER ADMIN' ? me : null; const ps=await all('products');
- document.getElementById('modalTitle').textContent='Record Sale';document.getElementById('modalBody').innerHTML=`<form id="saleForm" class="form-grid">
- <div class="field"><label>Seller</label><select name="sellerId" required>${directSeller?`<option value="${directSeller.id}" selected>${esc(directSeller.name)} • ${esc(directSeller.memberId)} • DIRECT SELLER</option>`:''}${ms.filter(m=>!directSeller||Number(m.id)!==Number(directSeller.id)).map(m=>`<option value="${m.id}">${esc(m.name)} • ${esc(m.memberId)}</option>`).join('')}</select></div>
- <div class="field"><label>Product</label><select name="productId" required>${ps.filter(p=>p.status==='ACTIVE').map(p=>`<option value="${p.id}">${esc(p.name)} — ${money(p.price)}</option>`).join('')}</select></div>
- <div class="field"><label>Quantity</label><input name="quantity" type="number" min="1" value="1"></div><div class="field"><label>Sale Date</label><input name="date" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
- <div class="field"><label>Customer Name</label><input name="customerName" required></div><div class="field"><label>Customer Mobile</label><input name="customerMobile"></div>
- <div class="field"><label>Customer Email</label><input name="customerEmail" type="email"></div><div class="field full"><label>Customer Address</label><textarea name="customerAddress"></textarea></div>
- <div class="field full"><button class="btn green">Save Sale & Calculate Commission</button></div></form>`;
- document.getElementById('modal').classList.add('show');document.getElementById('saleForm').onsubmit=saveSale
-}
+async function openSaleForm(){await syncCloudMembersToLocal();const aa=await all('members'),me=aa.find(m=>String(m.cloudId||'')===String(state.user?.cloudId||''))||aa.find(m=>Number(m.id)===Number(state.user?.id));let ms=isAdmin()?aa.filter(m=>m.status==='ACTIVE'):scopeMembers(aa).filter(m=>m.status==='ACTIVE');if(me&&!ms.some(m=>Number(m.id)===Number(me.id)))ms.unshift(me);const ps=await all('products');document.getElementById('modalTitle').textContent='Record Sale';document.getElementById('modalBody').innerHTML=`<form id="saleForm" class="form-grid"><div class="field"><label>Seller</label><select name="sellerId" required>${me?`<option value="${me.id}" selected>${esc(me.name)} • ${esc(me.memberId)} • DIRECT SALE</option>`:''}${ms.filter(m=>!me||Number(m.id)!==Number(me.id)).map(m=>`<option value="${m.id}">${esc(m.name)} • ${esc(m.memberId)} • ${esc(m.role)}</option>`).join('')}</select></div><div class="field"><label>Product</label><select name="productId" required>${ps.filter(p=>p.status==='ACTIVE').map(p=>`<option value="${p.id}">${esc(p.name)} — ${money(p.price)}</option>`).join('')}</select></div><div class="field"><label>Quantity</label><input name="quantity" type="number" min="1" value="1"></div><div class="field"><label>Sale Date</label><input name="date" type="date" value="${new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Customer Name *</label><input name="customerName" required></div><div class="field"><label>Customer Mobile</label><input name="customerMobile" inputmode="numeric"></div><div class="field"><label>Customer Email</label><input name="customerEmail" type="email"></div><div class="field full"><label>Customer Address</label><textarea name="customerAddress"></textarea></div><div class="field full"><button class="btn green">Save Sale & Calculate Commission</button></div></form>`;document.getElementById('modal').classList.add('show');document.getElementById('saleForm').onsubmit=saveSale}
+
 async function saveSale(e){
  e.preventDefault();const f=new FormData(e.target),aa=await all('members'),p=await get('products',Number(f.get('productId'))),me=aa.find(m=>String(m.cloudId||'')===String(state.user?.cloudId||''))||aa.find(m=>Number(m.id)===Number(state.user?.id)),requestedSeller=aa.find(m=>m.id===Number(f.get('sellerId'))),seller=(me&&me.role==='INDEPENDENT PROJECT MANAGER'&&(!requestedSeller||Number(requestedSeller.id)===Number(me.id)))?me:requestedSeller,q=Number(f.get('quantity')||1),base=Number(p.base||0)*q,total=Number(p.price||0)*q,commission=seller.commissionType==='FIXED'?Number(seller.commissionValue||0)*q:base*Number(seller.commissionValue||0)/100,s=await settings(),tds=commission*Number(s.tds||5)/100;
  const o={saleId:uid('SALE'),date:f.get('date'),sellerId:seller.id,productId:p.id,productName:p.name,quantity:q,customerName:f.get('customerName'),customerMobile:f.get('customerMobile'),customerEmail:f.get('customerEmail'),customerAddress:f.get('customerAddress'),price:p.price,gst:p.gst,base,total,commission,tds,status:'COMPLETED',totalPayable:Math.max(0,commission-tds)};
@@ -1180,10 +1117,8 @@ function idCardBackHTML(){
 function idCardPairHTML(m,aa){
   return `<div class="id-card-pair"><div><div class="id-card-label">FRONT</div>${idCardFrontHTML(m,aa)}</div><div><div class="id-card-label">BACK</div>${idCardBackHTML()}</div></div>`;
 }
-async function renderSelectedIDCard(){
-  const id=Number(document.getElementById('idMemberSelect').value),m=await get('members',id),aa=await all('members');
-  document.getElementById('idPrint').innerHTML=idCardPairHTML(m,aa);
-}
+async function renderSelectedIDCard(){const id=String(document.getElementById('idMemberSelect')?.value||'');if(!id)return;try{const {data,error}=await window.careerNestSupabase.from('members').select('*, roles:role_id(code,name)').eq('id',id).maybeSingle();if(error)throw error;if(data)document.getElementById('idPrint').innerHTML=idCardPairHTML(cloudLocal(data),[cloudLocal(data)])}catch(e){toast('ID CARD LOAD FAILED: '+(e.message||e))}}
+
 function printIDPair(){
   const oldTitle=document.title;
   document.title='CAREER NEST ID CARD';
