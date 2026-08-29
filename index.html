@@ -487,16 +487,27 @@ function cloudLocal(m){
     cloudId:String(m.id),
     memberId:m.member_id||'',
     name:m.full_name||m.name||'',
+    full_name:m.full_name||m.name||'',
     role:normalizeRoleCode(m.roles?.code||m.roles?.name||m.role||'MEMBER'),
     role_id:m.role_id||null,
-    parentId:m.parentId??null,
+
+    parentId:m.parent_member_id
+      ? Math.abs(hashString(String(m.parent_member_id)))+1
+      : (m.parentId!=null
+          ? Math.abs(hashString(String(m.parentId)))+1
+          : null),
+
     parent_member_id:m.parent_member_id||null,
+
     status:String(m.status||'ACTIVE').toUpperCase(),
+
     email:m.email||'',
     mobile:m.mobile||'',
     joiningDate:m.joining_date||m.joiningDate||'',
+
     photo:m.photo||'',
     signature:m.signature||'',
+
     father:m.father_name||m.father||'',
     dob:m.dob||'',
     address:m.address||'',
@@ -506,13 +517,16 @@ function cloudLocal(m){
     pin:m.pin_code||m.pin||'',
     pan:m.pan||'',
     aadhaar4:m.aadhaar_last4||m.aadhaar4||'',
+
     accountName:m.account_name||m.accountName||'',
     bank:m.bank_name||m.bank||'',
     accountNo:m.account_no||m.accountNo||'',
     ifsc:m.ifsc||'',
+
     commissionType:m.commission_type||m.commissionType||'PERCENTAGE',
     commissionValue:Number(m.commission_value??m.commissionValue??0),
     targetAmount:Number(m.target_amount??m.targetAmount??0),
+
     createdAt:m.created_at||new Date().toISOString()
   };
 }
@@ -1340,14 +1354,14 @@ async function renderSelectedIDCard(){
   if(!id)return;
 
   try{
-    const {data:selected,error:selectedError}=await window.careerNestSupabase
+    const {data,error}=await window.careerNestSupabase
       .from('members')
       .select('*, roles:role_id(code,name)')
       .eq('id',id)
       .maybeSingle();
 
-    if(selectedError)throw selectedError;
-    if(!selected)return toast('MEMBER NOT FOUND');
+    if(error)throw error;
+    if(!data)return;
 
     const {data:allData,error:allError}=await window.careerNestSupabase
       .from('members')
@@ -1357,12 +1371,14 @@ async function renderSelectedIDCard(){
 
     if(allError)throw allError;
 
-    const m=cloudLocal(selected);
-    const aa=(allData||[]).map(cloudLocal);
+    const member=cloudLocal(data);
+    const allMembers=(allData||[]).map(cloudLocal);
 
-    document.getElementById('idPrint').innerHTML=idCardPairHTML(m,aa);
+    document.getElementById('idPrint').innerHTML=
+      idCardPairHTML(member,allMembers);
 
   }catch(e){
+    console.error('ID CARD LOAD FAILED',e);
     toast('ID CARD LOAD FAILED: '+(e.message||e));
   }
 }
