@@ -720,7 +720,42 @@ async function getPublicRegistrationContext(ownerId,targetRole){
 }
 
 async function buildRegistrationPDF(payload,docs,ctx){if(!window.PDFLib)throw new Error('PDF LIBRARY NOT LOADED');const {PDFDocument,StandardFonts,rgb}=window.PDFLib,pdf=await PDFDocument.create(),font=await pdf.embedFont(StandardFonts.Helvetica),bold=await pdf.embedFont(StandardFonts.HelveticaBold);let page=pdf.addPage([595.28,841.89]),y=800;const row=(a,b)=>{if(y<55){page=pdf.addPage([595.28,841.89]);y=800}page.drawText(a,{x:40,y,size:9,font:bold});page.drawText(String(b||'').replace(/\s+/g,' ').slice(0,160),{x:175,y,size:9,font});y-=17};page.drawText('CAREER NEST — REGISTRATION / KYC',{x:40,y,size:18,font:bold,color:rgb(.04,.14,.28)});y-=35;[['Member ID',payload.member_id],['Full Name',payload.full_name],['Father Name',payload.father_name],['DOB',payload.dob],['Mobile',payload.mobile],['Email',payload.email],['Address',payload.address],['State',payload.state_name],['District',payload.district_name],['City',payload.city],['PIN',payload.pin],['PAN',payload.pan],['Aadhaar Last 4',payload.aadhaar4],['Account Name',payload.account_name],['Bank',payload.bank],['Account No.',payload.account_no],['IFSC',payload.ifsc],['Role',ctx?.target_role],['Parent / Under',ctx?.owner_name]].forEach(x=>row(x[0],x[1]));for(const key of ['photo','signature','aadhaarDoc','panDoc','cheque']){const d=docs[key];if(!d)continue;const type=(d.match(/^data:([^;]+)/)||[])[1]||'';if(type==='application/pdf'){try{const raw=Uint8Array.from(atob(d.split(',')[1]),c=>c.charCodeAt(0)),src=await PDFDocument.load(raw);for(const cp of await pdf.copyPages(src,src.getPageIndices()))pdf.addPage(cp);continue}catch(_){}}if(type.startsWith('image/')){try{const raw=Uint8Array.from(atob(d.split(',')[1]),c=>c.charCodeAt(0)),img=type.includes('jpeg')?await pdf.embedJpg(raw):await pdf.embedPng(raw);if(y<340){page=pdf.addPage([595.28,841.89]);y=800}page.drawText(key.toUpperCase(),{x:40,y,size:10,font:bold});y-=15;const sc=Math.min(460/img.width,280/img.height,1);page.drawImage(img,{x:40,y:y-img.height*sc,width:img.width*sc,height:img.height*sc});y-=img.height*sc+25}catch(_){}}}const bytes=await pdf.save();let bin='';for(let i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(bin)}
-async function sendRegistrationEmail(member,payload,docs,ctx){try{const pdfBase64=await buildRegistrationPDF(payload,docs,ctx),r=await fetch(window.CAREER_NEST_REGISTRATION_EMAIL_FUNCTION,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:window.CAREER_NEST_REGISTRATION_EMAIL_TO,subject:`Career Nest Registration — ${member?.member_id||payload.member_id}`,filename:`Career-Nest-${member?.member_id||payload.member_id}.pdf`,pdfBase64,member,payload,context:ctx})});if(!r.ok)throw new Error(await r.text());return true}catch(e){console.error('Registration email failed',e);return false}}
+async function sendRegistrationEmail(member,payload,docs,ctx){
+  try{
+    const pdfBase64=await buildRegistrationPDF(payload,docs,ctx);
+
+    const r=await fetch(
+      window.CAREER_NEST_REGISTRATION_EMAIL_FUNCTION,
+      {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json'
+        },
+        body:JSON.stringify({
+          to:window.CAREER_NEST_REGISTRATION_EMAIL_TO,
+          subject:`Career Nest Registration — ${member?.member_id||payload.member_id}`,
+          filename:`Career-Nest-${member?.member_id||payload.member_id}.pdf`,
+          pdfBase64,
+          member,
+          payload,
+          context:ctx
+        })
+      }
+    );
+
+    const text=await r.text();
+
+    if(!r.ok){
+      throw new Error(`EMAIL FUNCTION ${r.status}: ${text}`);
+    }
+
+    return true;
+
+  }catch(e){
+    console.error('Registration email failed',e);
+    return false;
+  }
+}
 async function savePublicMember(e){
   e.preventDefault();
   const form=e.target;
