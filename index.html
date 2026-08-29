@@ -480,7 +480,42 @@ async function syncCloudSalesToLocal(){
  }catch(e){console.error('Cloud sales sync failed',e);return false}
 }
 
-function cloudLocal(m){return {...m,id:Math.abs(hashString(String(m.id)))+1,cloudId:String(m.id),memberId:m.member_id||'',name:m.full_name||m.name||'',role:normalizeRoleCode(m.roles?.code||m.roles?.name||m.role||'MEMBER'),status:String(m.status||'ACTIVE').toUpperCase()}}
+function cloudLocal(m){
+  return {
+    ...m,
+    id:Math.abs(hashString(String(m.id)))+1,
+    cloudId:String(m.id),
+    memberId:m.member_id||'',
+    name:m.full_name||m.name||'',
+    role:normalizeRoleCode(m.roles?.code||m.roles?.name||m.role||'MEMBER'),
+    role_id:m.role_id||null,
+    parentId:m.parentId??null,
+    parent_member_id:m.parent_member_id||null,
+    status:String(m.status||'ACTIVE').toUpperCase(),
+    email:m.email||'',
+    mobile:m.mobile||'',
+    joiningDate:m.joining_date||m.joiningDate||'',
+    photo:m.photo||'',
+    signature:m.signature||'',
+    father:m.father_name||m.father||'',
+    dob:m.dob||'',
+    address:m.address||'',
+    state:m.state_name||m.state||'',
+    district:m.district_name||m.district||'',
+    city:m.city_name||m.city||'',
+    pin:m.pin_code||m.pin||'',
+    pan:m.pan||'',
+    aadhaar4:m.aadhaar_last4||m.aadhaar4||'',
+    accountName:m.account_name||m.accountName||'',
+    bank:m.bank_name||m.bank||'',
+    accountNo:m.account_no||m.accountNo||'',
+    ifsc:m.ifsc||'',
+    commissionType:m.commission_type||m.commissionType||'PERCENTAGE',
+    commissionValue:Number(m.commission_value??m.commissionValue??0),
+    targetAmount:Number(m.target_amount??m.targetAmount??0),
+    createdAt:m.created_at||new Date().toISOString()
+  };
+}
 function hashString(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 async function openOnlineMemberIDCard(id){try{const {data,error}=await window.careerNestSupabase.from('members').select('*, roles:role_id(code,name)').eq('id',String(id)).maybeSingle();if(error)throw error;if(!data)return toast('MEMBER NOT FOUND');const m=cloudLocal(data);document.getElementById('modalTitle').textContent='MEMBER ID CARD';document.getElementById('modalBody').innerHTML=`<div class="actions"><button class="btn green" onclick="printIDPair()">PRINT ID CARD</button></div><div id="idPrint">${idCardPairHTML(m,[m])}</div>`;document.getElementById('modal').classList.add('show')}catch(e){toast('ID CARD LOAD FAILED: '+(e.message||e))}}
 
@@ -1208,8 +1243,11 @@ async function openPayoutForm(){
  document.getElementById('modal').classList.add('show');document.getElementById('payoutForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),s=await get('sales',Number(f.get('saleId'))),aa2=await all('members'),m=aa2.find(x=>x.id===s.sellerId),p={payoutId:uid('PAY'),memberId:m.id,memberName:m.name,saleId:s.saleId,gross:s.commission,tds:s.tds,net:s.commission-s.tds,paymentDate:f.get('paymentDate'),mode:f.get('mode'),utr:f.get('utr'),notes:f.get('notes'),status:'PAID'};await put('payouts',p);s.payoutId=p.payoutId;await put('sales',s);await audit('PAYOUT_MARKED_PAID',p.payoutId,m.name);closeModal();toast('Payout marked paid');go('payouts')}
 }
 function authorisedSignatureForMember(m,aa){
-  const pm=rootPM(m,aa);
-  return pm?.signature || '';
+  const admin = aa.find(x =>
+    x.role === 'SUPER ADMIN' && String(x.signature||'').trim()
+  );
+
+  return admin?.signature || state.user?.signature || '';
 }
 function idCardFrontHTML(m,aa){
   const sig=authorisedSignatureForMember(m,aa);
@@ -1261,7 +1299,38 @@ function idCardBackHTML(){
 function idCardPairHTML(m,aa){
   return `<div class="id-card-pair"><div><div class="id-card-label">FRONT</div>${idCardFrontHTML(m,aa)}</div><div><div class="id-card-label">BACK</div>${idCardBackHTML()}</div></div>`;
 }
-async function renderSelectedIDCard(){const id=String(document.getElementById('idMemberSelect')?.value||'');if(!id)return;try{const {data,error}=await window.careerNestSupabase.from('members').select('*, roles:role_id(code,name)').eq('id',id).maybeSingle();if(error)throw error;if(data)document.getElementById('idPrint').innerHTML=idCardPairHTML(cloudLocal(data),[cloudLocal(data)])}catch(e){toast('ID CARD LOAD FAILED: '+(e.message||e))}}
+async function renderSelectedIDCard(){
+  const id=String(document.getElementById('idMemberSelect')?.value||'');
+  if(!id)return;
+
+  try{
+    const {data,error}=await window.careerNestSupabase
+      .from('members')
+      .select('*, roles:role_id(code,name)')
+      .eq('id',id)
+      .maybeSingle();
+
+    if(error)throw error;
+    if(!data)return;
+
+    const {data:allData,error:allError}=await window.careerNestSupabase
+      .from('members')
+      .select('*, roles:role_id(code,name)')
+      .eq('status','ACTIVE')
+      .order('created_at',{ascending:true});
+
+    if(allError)throw allError;
+
+    const member=cloudLocal(data);
+    const allMembers=(allData||[]).map(cloudLocal);
+
+    document.getElementById('idPrint').innerHTML=
+      idCardPairHTML(member,allMembers);
+
+  }catch(e){
+    toast('ID CARD LOAD FAILED: '+(e.message||e));
+  }
+}
 
 function printIDPair(){
   const oldTitle=document.title;
