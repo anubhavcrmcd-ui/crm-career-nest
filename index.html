@@ -517,7 +517,43 @@ function cloudLocal(m){
   };
 }
 function hashString(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
-async function openOnlineMemberIDCard(id){try{const {data,error}=await window.careerNestSupabase.from('members').select('*, roles:role_id(code,name)').eq('id',String(id)).maybeSingle();if(error)throw error;if(!data)return toast('MEMBER NOT FOUND');const m=cloudLocal(data);document.getElementById('modalTitle').textContent='MEMBER ID CARD';document.getElementById('modalBody').innerHTML=`<div class="actions"><button class="btn green" onclick="printIDPair()">PRINT ID CARD</button></div><div id="idPrint">${idCardPairHTML(m,[m])}</div>`;document.getElementById('modal').classList.add('show')}catch(e){toast('ID CARD LOAD FAILED: '+(e.message||e))}}
+async function openOnlineMemberIDCard(id){
+  try{
+    const {data:selected,error:selectedError}=await window.careerNestSupabase
+      .from('members')
+      .select('*, roles:role_id(code,name)')
+      .eq('id',String(id))
+      .maybeSingle();
+
+    if(selectedError)throw selectedError;
+    if(!selected)return toast('MEMBER NOT FOUND');
+
+    const {data:allData,error:allError}=await window.careerNestSupabase
+      .from('members')
+      .select('*, roles:role_id(code,name)')
+      .eq('status','ACTIVE')
+      .order('created_at',{ascending:true});
+
+    if(allError)throw allError;
+
+    const m=cloudLocal(selected);
+    const aa=(allData||[]).map(cloudLocal);
+
+    document.getElementById('modalTitle').textContent='MEMBER ID CARD';
+
+    document.getElementById('modalBody').innerHTML=`
+      <div class="actions">
+        <button class="btn green" onclick="printIDPair()">PRINT ID CARD</button>
+      </div>
+      <div id="idPrint">${idCardPairHTML(m,aa)}</div>
+    `;
+
+    document.getElementById('modal').classList.add('show');
+
+  }catch(e){
+    toast('ID CARD LOAD FAILED: '+(e.message||e));
+  }
+}
 
 async function audit(action,recordId='',details=''){await put('audit',{user:state.user?.memberId||'SYSTEM',action,recordId,details,dateTime:new Date().toISOString(),ip:'LOCAL'})}
 async function settings(){const x=await all('settings');return x[0]||{tds:5}}
@@ -1304,14 +1340,14 @@ async function renderSelectedIDCard(){
   if(!id)return;
 
   try{
-    const {data,error}=await window.careerNestSupabase
+    const {data:selected,error:selectedError}=await window.careerNestSupabase
       .from('members')
       .select('*, roles:role_id(code,name)')
       .eq('id',id)
       .maybeSingle();
 
-    if(error)throw error;
-    if(!data)return;
+    if(selectedError)throw selectedError;
+    if(!selected)return toast('MEMBER NOT FOUND');
 
     const {data:allData,error:allError}=await window.careerNestSupabase
       .from('members')
@@ -1321,17 +1357,15 @@ async function renderSelectedIDCard(){
 
     if(allError)throw allError;
 
-    const member=cloudLocal(data);
-    const allMembers=(allData||[]).map(cloudLocal);
+    const m=cloudLocal(selected);
+    const aa=(allData||[]).map(cloudLocal);
 
-    document.getElementById('idPrint').innerHTML=
-      idCardPairHTML(member,allMembers);
+    document.getElementById('idPrint').innerHTML=idCardPairHTML(m,aa);
 
   }catch(e){
     toast('ID CARD LOAD FAILED: '+(e.message||e));
   }
 }
-
 function printIDPair(){
   const oldTitle=document.title;
   document.title='CAREER NEST ID CARD';
