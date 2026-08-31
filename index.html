@@ -1,5 +1,5 @@
-<!-- CAREER NEST CRM V25.2 CLOUD SALES DIRECT FINAL -->
-<!-- V25.1: SUPABASE CLOUD SALES + COMMISSION -->
+<!-- CAREER NEST CRM V25 FINAL -->
+<!-- CAREER NEST CRM V24.8 FINAL PM DIRECT SALES + ID CARD -->
 <!-- CAREER NEST CRM V24.7 FINAL ONLINE MEMBER SALES + ID CARD -->
 <!-- CAREER NEST CRM V24.3 FINAL -->
 <!doctype html>
@@ -7,7 +7,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CAREER NEST CRM — V25.2 Cloud Sales Direct</title>
+<title>CAREER NEST CRM — V24 Online Registration</title>
 <style>
 :root{--nav:#0b2447;--nav2:#123b6d;--green:#4b8f2c;--ink:#172033;--muted:#667085;--bg:#f4f7fb;--card:#fff;--line:#e5e7eb;--danger:#c62828;--shadow:0 8px 28px rgba(16,24,40,.08)}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -173,6 +173,15 @@ input:focus,select:focus,textarea:focus{border-color:#4676a9;box-shadow:0 0 0 3p
   object-fit:contain;
   margin:.55mm auto 0;
 }
+.id-sign-name{
+  display:block;
+  margin:.7mm auto 0;
+  font-size:2.05mm;
+  line-height:1.1;
+  font-weight:900;
+  color:#0b2447;
+  text-transform:uppercase;
+}
 .id-back{
   text-align:left;
 }
@@ -279,7 +288,7 @@ window.careerNestSupabase = window.supabase.createClient(window.CAREER_NEST_SUPA
 window.CAREER_NEST_REGISTRATION_EMAIL_TO="anubhavcrmcd@gmail.com";window.CAREER_NEST_REGISTRATION_EMAIL_FUNCTION=window.CAREER_NEST_REGISTRATION_EMAIL_FUNCTION||(window.CAREER_NEST_SUPABASE_URL+"/functions/v1/send-registration-email");
 </script>
 </head>
-<body><div style="position:fixed;right:8px;bottom:8px;z-index:99999;font:11px Arial;padding:4px 7px;background:#111;color:#fff;border-radius:4px;opacity:.75">CRM V25.4 FINAL PRODUCTION</div>
+<body>
 <div id="login" class="login">
   <div class="login-card">
     <div class="brand"><img src="data:image/webp;base64,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"><h1>CAREER NEST CRM</h1><p>Online Edition — Supabase Cloud</p></div>
@@ -314,10 +323,9 @@ window.CAREER_NEST_REGISTRATION_EMAIL_TO="anubhavcrmcd@gmail.com";window.CAREER_
   // All normal text fields are automatically uppercased.
   // Email and password remain case-sensitive/free-form.
   function isExcluded(el){
-  return !el ||
-    ['EMAIL','PASSWORD','FILE'].includes((el.type || '').toUpperCase()) ||
-    ['email','password'].includes((el.id || '').toLowerCase());
-}
+    return !el || ['EMAIL','PASSWORD'].includes((el.type || '').toUpperCase()) ||
+      ['email','password'].includes((el.id || '').toLowerCase());
+  }
 
   function upperize(el){
     if (!el || isExcluded(el)) return;
@@ -398,21 +406,8 @@ async function initDB(){
   r.onupgradeneeded=e=>{const db=e.target.result;
    ['members','products','sales','targets','payouts','audit','settings'].forEach(n=>{if(!db.objectStoreNames.contains(n))db.createObjectStore(n,{keyPath:'id',autoIncrement:true})});
   };
-  r.onsuccess=async()=>{state.db=r.result;await seed();await freshLocalBaseline();resolve()};r.onerror=()=>reject(r.error);
+  r.onsuccess=async()=>{state.db=r.result;await seed();resolve()};r.onerror=()=>reject(r.error);
  });
-}
-async function freshLocalBaseline(){
-  try{
-    const flag='CAREER_NEST_V25_4_LOCAL_BASELINE_DONE';
-    if(localStorage.getItem(flag)==='1')return;
-    // Clear only operational/test data. Products/settings are retained.
-    for(const n of ['sales','payouts','targets','audit']) await clear(n);
-    const ms=await all('members');
-    for(const m of ms){
-      if(String(m.role||'').toUpperCase()!=='SUPER ADMIN') await del('members',m.id);
-    }
-    localStorage.setItem(flag,'1');
-  }catch(e){console.warn('Local baseline cleanup skipped',e)}
 }
 async function seed(){
  if(!(await all('members')).length){
@@ -440,12 +435,6 @@ async function syncCloudMembersToLocal(){
  try{
   const {data,error}=await window.careerNestSupabase.from('members').select('*, roles:role_id(code,name)').eq('status','ACTIVE').order('created_at',{ascending:true});
   if(error)throw error;
-  // V25.4: rebuild local member cache from Supabase so stale test members cannot survive locally.
-  const localBefore=await all('members');
-  for(const lm of localBefore){
-    const keep=String(lm.role||'').toUpperCase()==='SUPER ADMIN';
-    if(!keep) await del('members',lm.id);
-  }
   const local=await all('members'),bc=new Map(local.filter(x=>x.cloudId).map(x=>[String(x.cloudId),x])),bm=new Map(local.filter(x=>x.memberId).map(x=>[String(x.memberId),x]));
   let next=Math.max(0,...local.map(x=>Number(x.id)||0))+1;const ids=new Map(),cloud=new Map((data||[]).map(x=>[String(x.id),x]));
   for(const m of(data||[])){const old=bc.get(String(m.id))||bm.get(String(m.member_id));ids.set(String(m.id),old?.id||next++);}
@@ -455,115 +444,48 @@ async function syncCloudMembersToLocal(){
  }catch(e){console.error(e);return false}
 }
 async function fetchOnlineMembers(){const {data,error}=await window.careerNestSupabase.from('members').select('*, roles:role_id(code,name)').eq('status','ACTIVE').order('created_at',{ascending:true});if(error)throw error;return data||[]}
-async function fetchCloudSalesDirect(){
-  if(!window.careerNestSupabase) throw new Error('SUPABASE CLIENT NOT READY');
-  const {data,error}=await window.careerNestSupabase.rpc('public_list_sales');
-  if(error) throw error;
-  return data||[];
-}
-async function syncCloudSalesToLocal(){
- if(!window.careerNestSupabase||!state.db)return false;
- try{
-  const {data,error}=await window.careerNestSupabase.rpc('public_list_sales');
-  if(error)throw error;
-  const local=await all('sales');
-  const byCloud=new Map(local.filter(x=>x.cloudSaleId).map(x=>[String(x.cloudSaleId),x]));
-  const bySale=new Map(local.filter(x=>x.saleId).map(x=>[String(x.saleId),x]));
-  let next=Math.max(0,...local.map(x=>Number(x.id)||0))+1;
-  for(const r of (data||[])){
-    const sellerLocal=(await all('members')).find(m=>String(m.cloudId||'')===String(r.seller_id));
-    if(!sellerLocal)continue;
-    const old=byCloud.get(String(r.id))||bySale.get(String(r.sale_id))||{};
-    await put('sales',{...old,id:old.id||next++,cloudSaleId:String(r.id),saleId:r.sale_id,date:r.sale_date,sellerId:sellerLocal.id,productId:r.product_id?Number(r.product_id)||r.product_id:null,productName:r.product_name,quantity:Number(r.quantity||1),customerName:r.customer_name||'',customerMobile:r.customer_mobile||'',customerEmail:r.customer_email||'',customerAddress:r.customer_address||'',price:Number(r.price||0),gst:Number(r.gst||0),base:Number(r.commission_base||0),total:Number(r.total||0),commission:Number(r.commission||0),tds:Number(r.tds||0),status:r.status||'COMPLETED',totalPayable:Number(r.total_payable||0),payoutId:r.payout_id||null,createdAt:r.created_at});
-  }
-  return true;
- }catch(e){console.error('Cloud sales sync failed',e);return false}
-}
-
 function cloudLocal(m){
   return {
     ...m,
     id:Math.abs(hashString(String(m.id)))+1,
     cloudId:String(m.id),
-    memberId:m.member_id||'',
+    memberId:m.member_id||m.memberId||'',
     name:m.full_name||m.name||'',
     full_name:m.full_name||m.name||'',
-    role:normalizeRoleCode(m.roles?.code||m.roles?.name||m.role||'MEMBER'),
-    role_id:m.role_id||null,
-
-    parentId:m.parent_member_id
-      ? Math.abs(hashString(String(m.parent_member_id)))+1
-      : (m.parentId!=null
-          ? Math.abs(hashString(String(m.parentId)))+1
-          : null),
-
+    parentId:m.parentId??m.parent_id??null,
     parent_member_id:m.parent_member_id||null,
-
-    status:String(m.status||'ACTIVE').toUpperCase(),
-
+    photo:m.photo||'',
+    joiningDate:m.joining_date||m.joiningDate||'',
     email:m.email||'',
     mobile:m.mobile||'',
-    joiningDate:m.joining_date||m.joiningDate||'',
-
-    photo:m.photo||'',
-    signature:m.signature||'',
-
-    father:m.father_name||m.father||'',
-    dob:m.dob||'',
-    address:m.address||'',
-    state:m.state_name||m.state||'',
-    district:m.district_name||m.district||'',
-    city:m.city_name||m.city||'',
-    pin:m.pin_code||m.pin||'',
-    pan:m.pan||'',
-    aadhaar4:m.aadhaar_last4||m.aadhaar4||'',
-
-    accountName:m.account_name||m.accountName||'',
-    bank:m.bank_name||m.bank||'',
-    accountNo:m.account_no||m.accountNo||'',
-    ifsc:m.ifsc||'',
-
-    commissionType:m.commission_type||m.commissionType||'PERCENTAGE',
-    commissionValue:Number(m.commission_value??m.commissionValue??0),
-    targetAmount:Number(m.target_amount??m.targetAmount??0),
-
-    createdAt:m.created_at||new Date().toISOString()
+    role:normalizeRoleCode(m.roles?.code||m.roles?.name||m.role||'MEMBER'),
+    status:String(m.status||'ACTIVE').toUpperCase()
   };
 }
 function hashString(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 async function openOnlineMemberIDCard(id){
   try{
-    const {data:selected,error:selectedError}=await window.careerNestSupabase
+    const {data,error}=await window.careerNestSupabase
       .from('members')
       .select('*, roles:role_id(code,name)')
       .eq('id',String(id))
       .maybeSingle();
-
-    if(selectedError)throw selectedError;
-    if(!selected)return toast('MEMBER NOT FOUND');
+    if(error)throw error;
+    if(!data)return toast('MEMBER NOT FOUND');
 
     const {data:allData,error:allError}=await window.careerNestSupabase
       .from('members')
       .select('*, roles:role_id(code,name)')
       .eq('status','ACTIVE')
       .order('created_at',{ascending:true});
-
     if(allError)throw allError;
 
-    const m=cloudLocal(selected);
     const aa=(allData||[]).map(cloudLocal);
+    const m=cloudLocal(data);
 
     document.getElementById('modalTitle').textContent='MEMBER ID CARD';
-
-    document.getElementById('modalBody').innerHTML=`
-      <div class="actions">
-        <button class="btn green" onclick="printIDPair()">PRINT ID CARD</button>
-      </div>
-      <div id="idPrint">${idCardPairHTML(m,aa)}</div>
-    `;
-
+    document.getElementById('modalBody').innerHTML=`<div class="actions"><button class="btn green" onclick="printIDPair()">PRINT ID CARD</button></div><div id="idPrint">${idCardPairHTML(m,aa)}</div>`;
     document.getElementById('modal').classList.add('show');
-
   }catch(e){
     toast('ID CARD LOAD FAILED: '+(e.message||e));
   }
@@ -573,10 +495,8 @@ async function audit(action,recordId='',details=''){await put('audit',{user:stat
 async function settings(){const x=await all('settings');return x[0]||{tds:5}}
 function scopeMembers(ms){
  if(isAdmin())return ms;
- const me=ms.find(m=>String(m.cloudId||'')===String(state.user?.cloudId||''))||ms.find(m=>Number(m.id)===Number(state.user?.id));
- if(!me)return [];
- const ids=new Set([me.id]);let loop=true;
- while(loop){loop=false;for(const m of ms)if(m.parentId!=null&&ids.has(m.parentId)&&!ids.has(m.id)){ids.add(m.id);loop=true}}
+ const ids=new Set([state.user.id]);let loop=true;
+ while(loop){loop=false;for(const m of ms)if(m.parentId&&ids.has(m.parentId)&&!ids.has(m.id)){ids.add(m.id);loop=true}}
  return ms.filter(m=>ids.has(m.id));
 }
 function memberName(id,ms){const m=ms.find(x=>x.id==id);return m?m.name:'—'}
@@ -647,7 +567,19 @@ async function renderDashboardWithRange(from,to,view){
 }
 
 function subtreeIds(root,ms){const ids=new Set([root]);let loop=true;while(loop){loop=false;for(const m of ms)if(m.parentId&&ids.has(m.parentId)&&!ids.has(m.id)){ids.add(m.id);loop=true}}return ids}
-function rootPM(m,ms){let x=m,guard=0;while(x&&guard++<20){if(x.role==='INDEPENDENT PROJECT MANAGER')return x;x=ms.find(a=>a.id===x.parentId)}return null}
+function rootPM(m,ms){
+  let x=m,guard=0;
+  while(x&&guard++<20){
+    if(String(x.role||'').toUpperCase()==='INDEPENDENT PROJECT MANAGER')return x;
+    const pid=x.parentId, cpid=x.parent_member_id;
+    x=ms.find(a=>
+      (pid!=null && String(a.id)===String(pid)) ||
+      (cpid!=null && String(a.cloudId||'')===String(cpid)) ||
+      (cpid!=null && String(a.id)===String(cpid))
+    )||null;
+  }
+  return null;
+}
 function allocationForPM(pmId,ms,exclude=null){const ids=subtreeIds(pmId,ms);return ms.filter(m=>ids.has(m.id)&&m.id!==pmId&&m.id!==exclude&&m.commissionType==='PERCENTAGE').reduce((a,m)=>a+Number(m.commissionValue||0),0)}
 
 function netPayable(s){return Math.max(0,Number(s.commission||0)-Number(s.tds||0))}
@@ -678,7 +610,7 @@ function buildNav(){
  if(!isAdmin())['products','audit'].forEach(x=>{const b=n.querySelector(`[data-page="${x}"]`);if(b)b.style.display='none'});
 }
 function go(p){state.page=p;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===p));document.getElementById('pageTitle').textContent=NAV.find(x=>x[0]===p)?.[1]||'Dashboard';render(p)}
-async function render(p){const c=document.getElementById('content');c.innerHTML='<div class="card">Loading…</div>';try{await syncCloudMembersToLocal();await syncCloudSalesToLocal()}catch(_){ }await (views[p]||views.dashboard)(c)}
+async function render(p){const c=document.getElementById('content');c.innerHTML='<div class="card">Loading…</div>';await (views[p]||views.dashboard)(c)}
 function logout(){state.user=null;document.getElementById('app').style.display='none';document.getElementById('login').style.display='grid'}
 document.getElementById('loginForm').onsubmit=async e=>{
  e.preventDefault();
@@ -749,11 +681,9 @@ registration:async c=>{
   idcard:async c=>{try{const raw=await fetchOnlineMembers();let rows=raw.map(cloudLocal);if(!isAdmin()){const me=rows.find(m=>String(m.cloudId)===String(state.user?.cloudId||''));rows=me?[me]:[]}c.innerHTML=`<div class="card"><div class="section-title"><h3>MEMBER ID CARDS</h3><button class="btn green" onclick="printIDPair()">PRINT ID CARD</button></div><div class="field"><label>SELECT MEMBER</label><select id="idMemberSelect" onchange="renderSelectedIDCard()">${rows.map(m=>`<option value="${esc(m.cloudId)}">${esc(m.name)} • ${esc(m.memberId)} • ${esc(m.role)}</option>`).join('')}</select></div><div id="idPrint" style="margin-top:16px"></div></div>`;if(rows.length)await renderSelectedIDCard()}catch(e){c.innerHTML=`<div class="card"><div class="empty">ID CARD LOAD FAILED: ${esc(e.message||e)}</div></div>`}},
 
  products:async c=>{const ps=await all('products');c.innerHTML=`<div class="card"><div class="section-title"><h3>Products (${ps.length})</h3><button class="btn green" onclick="openProductForm()">+ Add Product</button></div><div class="table-wrap"><table><thead><tr><th>Name</th><th>SKU</th><th>Selling Price</th><th>GST</th><th>Commission Base</th><th>Status</th><th></th></tr></thead><tbody>${ps.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.sku)}</td><td>${money(p.price)}</td><td>${money(p.gst)}</td><td>${money(p.base)}</td><td>${esc(p.status)}</td><td><button class="btn small" onclick="openProductForm(${p.id})">Edit</button> <button class="btn small red" onclick="deleteProduct(${p.id})">Delete</button></td></tr>`).join('')}</tbody></table></div></div>`},
- sales:async c=>{let rows=[];let cloudError='';try{rows=await fetchCloudSalesDirect()}catch(e){cloudError=e?.message||String(e)}
- c.innerHTML=`<div class="card"><div class="section-title"><h3>Sales (${rows.length})</h3><button class="btn green" onclick="openSaleForm()">+ Record Sale</button></div>${cloudError?`<div class="hint" style="color:#b42318;margin-bottom:10px">CLOUD SALES LOAD ERROR: ${esc(cloudError)}</div>`:''}<div class="table-wrap"><table><thead><tr><th>Sale ID / Date</th><th>SELLER NAME</th><th>MEMBER ID</th><th>ROLE</th><th>Customer</th><th>Product</th><th>Total</th><th>Gross Commission</th><th>TDS</th><th>NET PAYABLE COMMISSION</th><th>Status</th></tr></thead><tbody>${rows.sort((a,b)=>String(b.created_at||b.sale_date).localeCompare(String(a.created_at||a.sale_date))).map(x=>`<tr><td><b>${esc(x.sale_id||'—')}</b><br><small>${esc(x.sale_date||'')}</small></td><td><b>${esc(x.seller_name||'—')}</b></td><td>${esc(x.seller_member_id||'—')}</td><td>${esc(normalizeRoleCode(x.seller_role||''))}</td><td>${esc(x.customer_name||'')}<br>${esc(x.customer_mobile||'')}</td><td>${esc(x.product_name||'—')} × ${Number(x.quantity||1)}</td><td>${money(x.total||0)}</td><td>${money(x.commission||0)}</td><td>${money(x.tds||0)}</td><td><b>${money(x.total_payable!=null?x.total_payable:Number(x.commission||0)-Number(x.tds||0))}</b></td><td><span class="badge active">${esc(x.status||'COMPLETED')}</span></td></tr>`).join('')||'<tr><td colspan="11" class="empty">NO SALES FOUND IN SUPABASE</td></tr>'}</tbody></table></div></div>`},
-ledger:async c=>{let rows=[];let cloudError='';try{rows=await fetchCloudSalesDirect()}catch(e){cloudError=e?.message||String(e)}
- c.innerHTML=`<div class="card"><div class="section-title"><h3>Commission Ledger (${rows.length})</h3></div>${cloudError?`<div class="hint" style="color:#b42318;margin-bottom:10px">CLOUD COMMISSION LOAD ERROR: ${esc(cloudError)}</div>`:''}<div class="table-wrap"><table><thead><tr><th>Date</th><th>Sale</th><th>SELLER NAME</th><th>MEMBER ID</th><th>ROLE</th><th>Base</th><th>Gross Commission</th><th>TDS</th><th>NET PAYABLE COMMISSION</th><th>Status</th></tr></thead><tbody>${rows.sort((a,b)=>String(b.created_at||b.sale_date).localeCompare(String(a.created_at||a.sale_date))).map(x=>`<tr><td>${esc(x.sale_date||'')}</td><td>${esc(x.sale_id||'—')}</td><td><b>${esc(x.seller_name||'—')}</b></td><td>${esc(x.seller_member_id||'—')}</td><td>${esc(normalizeRoleCode(x.seller_role||''))}</td><td>${money(x.commission_base||0)}</td><td>${money(x.commission||0)}</td><td>${money(x.tds||0)}</td><td><b>${money(x.total_payable!=null?x.total_payable:Number(x.commission||0)-Number(x.tds||0))}</b></td><td>${esc(x.payout_id?'PAID':'UNPAID')}</td></tr>`).join('')||'<tr><td colspan="10" class="empty">NO COMMISSION DATA IN SUPABASE</td></tr>'}</tbody></table></div></div>`},
-targets:async c=>{const aa=await all('members'),ms=scopeMembers(aa),ts=await all('targets'),ss=await all('sales');c.innerHTML=`<div class="card"><div class="section-title"><h3>Targets</h3><button class="btn green" onclick="openTargetForm()">+ Set Target</button></div><div class="table-wrap"><table><thead><tr><th>Member</th><th>Month</th><th>Amount</th><th>Achieved</th><th>Progress</th><th>Units</th></tr></thead><tbody>${ts.filter(t=>ms.some(m=>m.id===t.memberId)).map(t=>{const achieved=ss.filter(s=>s.sellerId===t.memberId&&String(s.date).slice(0,7)===t.month).reduce((a,x)=>a+Number(x.total||0),0),pct=t.amount?Math.min(100,achieved/t.amount*100):0,units=ss.filter(s=>s.sellerId===t.memberId&&String(s.date).slice(0,7)===t.month).reduce((a,x)=>a+Number(x.quantity||0),0);return `<tr><td>${memberName(t.memberId,aa)}</td><td>${t.month}</td><td>${money(t.amount)}</td><td>${money(achieved)}</td><td style="min-width:180px"><div class="progress"><i style="width:${pct}%"></i></div><small>${pct.toFixed(1)}%</small></td><td>${units} / ${t.units}</td></tr>`}).join('')}</tbody></table></div></div>`},
+ sales:async c=>{const aa=await all('members'),ms=scopeMembers(aa),ss=(await all('sales')).filter(x=>ms.some(m=>m.id===x.sellerId));c.innerHTML=`<div class="card"><div class="section-title"><h3>Sales (${ss.length})</h3><button class="btn green" onclick="openSaleForm()">+ Record Sale</button></div><div class="table-wrap"><table><thead><tr><th>Sale ID / Date</th><th>SELLER NAME</th><th>MEMBER ID</th><th>ID CARD</th><th>Customer</th><th>Product</th><th>Total</th><th>Gross Commission</th><th>TDS</th><th>NET PAYABLE COMMISSION</th><th>Status</th></tr></thead><tbody>${ss.sort((a,b)=>b.id-a.id).map(x=>`<tr><td>${esc(x.saleId)}<br><small>${esc(x.date)}</small></td><td><b>${esc(memberName(x.sellerId,aa))}</b></td><td>${esc(memberMemberId(x.sellerId,aa))}</td><td><button class="btn small light" onclick="openMemberIDCard(${x.sellerId})">VIEW ID CARD</button></td><td>${esc(x.customerName)}<br>${esc(x.customerMobile)}</td><td>${esc(x.productName)} × ${x.quantity}</td><td>${money(x.total)}</td><td>${money(x.commission)}</td><td>${money(x.tds)}</td><td><b>${money(netPayable(x))}</b></td><td><span class="badge active">${esc(x.status)}</span></td></tr>`).join('')}</tbody></table></div></div>`},
+ ledger:async c=>{const aa=await all('members'),ms=scopeMembers(aa),ss=(await all('sales')).filter(x=>ms.some(m=>m.id===x.sellerId));c.innerHTML=`<div class="card"><div class="section-title"><h3>Commission Ledger</h3></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Sale</th><th>SELLER NAME</th><th>MEMBER ID</th><th>ID CARD</th><th>Base</th><th>Gross Commission</th><th>TDS</th><th>NET PAYABLE COMMISSION</th><th>Status</th></tr></thead><tbody>${ss.sort((a,b)=>b.id-a.id).map(x=>`<tr><td>${x.date}</td><td>${x.saleId}</td><td><b>${esc(memberName(x.sellerId,aa))}</b></td><td>${esc(memberMemberId(x.sellerId,aa))}</td><td><button class="btn small light" onclick="openMemberIDCard(${x.sellerId})">VIEW ID CARD</button></td><td>${money(x.base)}</td><td>${money(x.commission)}</td><td>${money(x.tds)}</td><td><b>${money(netPayable(x))}</b></td><td>${x.payoutId?'PAID':'UNPAID'}</td></tr>`).join('')}</tbody></table></div></div>`},
+ targets:async c=>{const aa=await all('members'),ms=scopeMembers(aa),ts=await all('targets'),ss=await all('sales');c.innerHTML=`<div class="card"><div class="section-title"><h3>Targets</h3><button class="btn green" onclick="openTargetForm()">+ Set Target</button></div><div class="table-wrap"><table><thead><tr><th>Member</th><th>Month</th><th>Amount</th><th>Achieved</th><th>Progress</th><th>Units</th></tr></thead><tbody>${ts.filter(t=>ms.some(m=>m.id===t.memberId)).map(t=>{const achieved=ss.filter(s=>s.sellerId===t.memberId&&String(s.date).slice(0,7)===t.month).reduce((a,x)=>a+Number(x.total||0),0),pct=t.amount?Math.min(100,achieved/t.amount*100):0,units=ss.filter(s=>s.sellerId===t.memberId&&String(s.date).slice(0,7)===t.month).reduce((a,x)=>a+Number(x.quantity||0),0);return `<tr><td>${memberName(t.memberId,aa)}</td><td>${t.month}</td><td>${money(t.amount)}</td><td>${money(achieved)}</td><td style="min-width:180px"><div class="progress"><i style="width:${pct}%"></i></div><small>${pct.toFixed(1)}%</small></td><td>${units} / ${t.units}</td></tr>`}).join('')}</tbody></table></div></div>`},
  payouts:async c=>{const aa=await all('members'),ms=scopeMembers(aa),ss=await all('sales');
  const me=state.user, roll=payoutRollup(me.id,ms,ss), children=directTeamPayouts(me,ms,ss);
  const adminRows=isAdmin()?aa.filter(m=>m.role==='INDEPENDENT PROJECT MANAGER').map(pm=>({member:pm,rollup:payoutRollup(pm.id,aa,ss)})):[];
@@ -805,42 +735,7 @@ async function getPublicRegistrationContext(ownerId,targetRole){
 }
 
 async function buildRegistrationPDF(payload,docs,ctx){if(!window.PDFLib)throw new Error('PDF LIBRARY NOT LOADED');const {PDFDocument,StandardFonts,rgb}=window.PDFLib,pdf=await PDFDocument.create(),font=await pdf.embedFont(StandardFonts.Helvetica),bold=await pdf.embedFont(StandardFonts.HelveticaBold);let page=pdf.addPage([595.28,841.89]),y=800;const row=(a,b)=>{if(y<55){page=pdf.addPage([595.28,841.89]);y=800}page.drawText(a,{x:40,y,size:9,font:bold});page.drawText(String(b||'').replace(/\s+/g,' ').slice(0,160),{x:175,y,size:9,font});y-=17};page.drawText('CAREER NEST — REGISTRATION / KYC',{x:40,y,size:18,font:bold,color:rgb(.04,.14,.28)});y-=35;[['Member ID',payload.member_id],['Full Name',payload.full_name],['Father Name',payload.father_name],['DOB',payload.dob],['Mobile',payload.mobile],['Email',payload.email],['Address',payload.address],['State',payload.state_name],['District',payload.district_name],['City',payload.city],['PIN',payload.pin],['PAN',payload.pan],['Aadhaar Last 4',payload.aadhaar4],['Account Name',payload.account_name],['Bank',payload.bank],['Account No.',payload.account_no],['IFSC',payload.ifsc],['Role',ctx?.target_role],['Parent / Under',ctx?.owner_name]].forEach(x=>row(x[0],x[1]));for(const key of ['photo','signature','aadhaarDoc','panDoc','cheque']){const d=docs[key];if(!d)continue;const type=(d.match(/^data:([^;]+)/)||[])[1]||'';if(type==='application/pdf'){try{const raw=Uint8Array.from(atob(d.split(',')[1]),c=>c.charCodeAt(0)),src=await PDFDocument.load(raw);for(const cp of await pdf.copyPages(src,src.getPageIndices()))pdf.addPage(cp);continue}catch(_){}}if(type.startsWith('image/')){try{const raw=Uint8Array.from(atob(d.split(',')[1]),c=>c.charCodeAt(0)),img=type.includes('jpeg')?await pdf.embedJpg(raw):await pdf.embedPng(raw);if(y<340){page=pdf.addPage([595.28,841.89]);y=800}page.drawText(key.toUpperCase(),{x:40,y,size:10,font:bold});y-=15;const sc=Math.min(460/img.width,280/img.height,1);page.drawImage(img,{x:40,y:y-img.height*sc,width:img.width*sc,height:img.height*sc});y-=img.height*sc+25}catch(_){}}}const bytes=await pdf.save();let bin='';for(let i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(bin)}
-async function sendRegistrationEmail(member,payload,docs,ctx){
-  try{
-    const pdfBase64=await buildRegistrationPDF(payload,docs,ctx);
-
-    const r=await fetch(
-      window.CAREER_NEST_REGISTRATION_EMAIL_FUNCTION,
-      {
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json'
-        },
-        body:JSON.stringify({
-          to:window.CAREER_NEST_REGISTRATION_EMAIL_TO,
-          subject:`Career Nest Registration — ${member?.member_id||payload.member_id}`,
-          filename:`Career-Nest-${member?.member_id||payload.member_id}.pdf`,
-          pdfBase64,
-          member,
-          payload,
-          context:ctx
-        })
-      }
-    );
-
-    const text=await r.text();
-
-    if(!r.ok){
-      throw new Error(`EMAIL FUNCTION ${r.status}: ${text}`);
-    }
-
-    return true;
-
-  }catch(e){
-    console.error('Registration email failed',e);
-    return false;
-  }
-}
+async function sendRegistrationEmail(member,payload,docs,ctx){try{const pdfBase64=await buildRegistrationPDF(payload,docs,ctx),r=await fetch(window.CAREER_NEST_REGISTRATION_EMAIL_FUNCTION,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:window.CAREER_NEST_REGISTRATION_EMAIL_TO,subject:`Career Nest Registration — ${member?.member_id||payload.member_id}`,filename:`Career-Nest-${member?.member_id||payload.member_id}.pdf`,pdfBase64,member,payload,context:ctx})});if(!r.ok)throw new Error(await r.text());return true}catch(e){console.error('Registration email failed',e);return false}}
 async function savePublicMember(e){
   e.preventDefault();
   const form=e.target;
@@ -888,8 +783,8 @@ async function savePublicMember(e){
   const payload={
     member_id:uid('CN'),full_name:name,name,father:String(f.get('father')||'').trim().toUpperCase(),father_name:String(f.get('father')||'').trim().toUpperCase(),
     dob:String(f.get('dob')||'').trim(),mobile,email,address:String(f.get('address')||'').trim().toUpperCase(),
-state:String(f.get('state')||'').trim().toUpperCase(),state_name:String(f.get('state')||'').trim().toUpperCase(),
-district:String(f.get('district')||'').trim().toUpperCase(),district_name:String(f.get('district')||'').trim().toUpperCase(),city:String(f.get('city')||'').trim().toUpperCase(),pin,pan,aadhaar4:aad,
+    state:String(f.get('state')||'').trim().toUpperCase(),state_name:String(f.get('state')||'').trim().toUpperCase(),
+    district:String(f.get('district')||'').trim().toUpperCase(),district_name:String(f.get('district')||'').trim().toUpperCase(),city:String(f.get('city')||'').trim().toUpperCase(),pin,pan,aadhaar4,
     account_name:String(f.get('accountName')||'').trim().toUpperCase(),accountName:String(f.get('accountName')||'').trim().toUpperCase(),
     bank:String(f.get('bank')||'').trim().toUpperCase(),account_no:String(f.get('accountNo')||'').trim(),accountNo:String(f.get('accountNo')||'').trim(),ifsc,
     commission_type:String(f.get('commissionType')||'PERCENTAGE').trim().toUpperCase(),commissionType:String(f.get('commissionType')||'PERCENTAGE').trim().toUpperCase(),
@@ -901,8 +796,6 @@ district:String(f.get('district')||'').trim().toUpperCase(),district_name:String
   };
   const {data:newMember,error:insertError}=await window.careerNestSupabase.rpc('public_register_member',{p_owner_id:String(pub.ownerId),p_target_role:String(pub.targetRole),p_auth_user_id:String(authUser.id),p_payload:payload});
   if(insertError){try{await window.careerNestSupabase.auth.signOut();}catch(_){}window.__publicSaving=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=oldBtnText;}return toast(insertError.message||'REGISTRATION SUBMISSION FAILED');}
-  let emailed=false;
-  try{emailed=await sendRegistrationEmail(newMember,payload,docs,pub);}catch(emailErr){console.error('Registration email failed',emailErr)}
   try{await window.careerNestSupabase.auth.signOut();}catch(_){}
   window.__publicRegistration=null;
   const box=document.getElementById('publicRegistration');
@@ -1218,68 +1111,10 @@ async function openProductForm(id=null){
 async function openSaleForm(){await syncCloudMembersToLocal();const aa=await all('members'),me=aa.find(m=>String(m.cloudId||'')===String(state.user?.cloudId||''))||aa.find(m=>Number(m.id)===Number(state.user?.id));let ms=isAdmin()?aa.filter(m=>m.status==='ACTIVE'):scopeMembers(aa).filter(m=>m.status==='ACTIVE');if(me&&!ms.some(m=>Number(m.id)===Number(me.id)))ms.unshift(me);const ps=await all('products');document.getElementById('modalTitle').textContent='Record Sale';document.getElementById('modalBody').innerHTML=`<form id="saleForm" class="form-grid"><div class="field"><label>Seller</label><select name="sellerId" required>${me?`<option value="${me.id}" selected>${esc(me.name)} • ${esc(me.memberId)} • DIRECT SALE</option>`:''}${ms.filter(m=>!me||Number(m.id)!==Number(me.id)).map(m=>`<option value="${m.id}">${esc(m.name)} • ${esc(m.memberId)} • ${esc(m.role)}</option>`).join('')}</select></div><div class="field"><label>Product</label><select name="productId" required>${ps.filter(p=>p.status==='ACTIVE').map(p=>`<option value="${p.id}">${esc(p.name)} — ${money(p.price)}</option>`).join('')}</select></div><div class="field"><label>Quantity</label><input name="quantity" type="number" min="1" value="1"></div><div class="field"><label>Sale Date</label><input name="date" type="date" value="${new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Customer Name *</label><input name="customerName" required></div><div class="field"><label>Customer Mobile</label><input name="customerMobile" inputmode="numeric"></div><div class="field"><label>Customer Email</label><input name="customerEmail" type="email"></div><div class="field full"><label>Customer Address</label><textarea name="customerAddress"></textarea></div><div class="field full"><button class="btn green">Save Sale & Calculate Commission</button></div></form>`;document.getElementById('modal').classList.add('show');document.getElementById('saleForm').onsubmit=saveSale}
 
 async function saveSale(e){
- e.preventDefault();
- try{
-  const f=new FormData(e.target);
-  const aa=await all('members');
-  const p=await get('products',Number(f.get('productId')));
-  if(!p)return toast('PRODUCT NOT FOUND');
-
-  // Always resolve the seller against the cloud member profile.
-  const online=await fetchOnlineMembers();
-  const meLocal=aa.find(m=>String(m.cloudId||'')===String(state.user?.cloudId||''))||aa.find(m=>Number(m.id)===Number(state.user?.id));
-  const meCloud=(online||[]).find(m=>String(m.id)===String(meLocal?.cloudId||'')) ||
-                (online||[]).find(m=>String(m.auth_user_id||'')===String(state.user?.authUserId||''));
-  const requestedLocal=aa.find(m=>Number(m.id)===Number(f.get('sellerId')));
-  const requestedCloud=(online||[]).find(m=>String(m.id)===String(requestedLocal?.cloudId||''));
-  const sellerCloud=requestedCloud || ((meCloud&&String(meCloud.id)===String(requestedLocal?.cloudId||''))?meCloud:null) ||
-                    ((meCloud && String(meCloud.role||'').toUpperCase()==='INDEPENDENT PROJECT MANAGER' && !requestedLocal)?meCloud:null) || meCloud;
-  if(!sellerCloud)return toast('SELLER CLOUD PROFILE NOT FOUND');
-
-  const sellerRole=normalizeRoleCode(sellerCloud.roles?.code||sellerCloud.role||sellerCloud.role_code||'');
-  const commissionType=sellerCloud.commission_type||sellerCloud.commissionType||meLocal?.commissionType||'PERCENTAGE';
-  const commissionValue=Number(sellerCloud.commission_value??sellerCloud.commissionValue??meLocal?.commissionValue??0);
-  const q=Math.max(1,Number(f.get('quantity')||1));
-  const base=Number(p.base||0)*q;
-  const total=Number(p.price||0)*q;
-  const commission=commissionType==='FIXED'?commissionValue*q:base*commissionValue/100;
-  const st=await settings();
-  const tds=commission*Number(st.tds||5)/100;
-  const saleId=uid('SALE');
-  const payload={
-   sale_id:saleId,
-   sale_date:f.get('date'),
-   seller_id:String(sellerCloud.id),
-   product_id:String(p.id),
-   product_name:p.name,
-   quantity:q,
-   customer_name:f.get('customerName'),
-   customer_mobile:f.get('customerMobile'),
-   customer_email:f.get('customerEmail'),
-   customer_address:f.get('customerAddress'),
-   price:Number(p.price||0),
-   gst:Number(p.gst||0),
-   commission_base:base,
-   total,
-   commission,
-   tds,
-   status:'COMPLETED'
-  };
-
-  const {data,error}=await window.careerNestSupabase.rpc('public_create_sale',{p_sale:payload});
-  if(error)throw error;
-  if(!data?.sale_id)throw new Error('SALE WAS NOT SAVED TO SUPABASE');
-
-  // Refresh local cache for compatibility with the rest of the application.
-  await syncCloudMembersToLocal();
-  await syncCloudSalesToLocal();
-  try{await audit('SALE_CREATED',data.sale_id,`${sellerCloud.full_name||sellerCloud.name||'SELLER'} / ${p.name}`)}catch(auditErr){console.warn('Audit log failed after sale save',auditErr)}
-  closeModal();
-  toast('V25.4: SALE SAVED TO SUPABASE. COMMISSION CALCULATED.');
-  go('sales');
- }catch(err){console.error('SALE SAVE ERROR',err);toast('SALE SAVE FAILED: '+(err?.message||err))}
+ e.preventDefault();const f=new FormData(e.target),aa=await all('members'),p=await get('products',Number(f.get('productId'))),me=aa.find(m=>String(m.cloudId||'')===String(state.user?.cloudId||''))||aa.find(m=>Number(m.id)===Number(state.user?.id)),requestedSeller=aa.find(m=>m.id===Number(f.get('sellerId'))),seller=(me&&me.role==='INDEPENDENT PROJECT MANAGER'&&(!requestedSeller||Number(requestedSeller.id)===Number(me.id)))?me:requestedSeller,q=Number(f.get('quantity')||1),base=Number(p.base||0)*q,total=Number(p.price||0)*q,commission=seller.commissionType==='FIXED'?Number(seller.commissionValue||0)*q:base*Number(seller.commissionValue||0)/100,s=await settings(),tds=commission*Number(s.tds||5)/100;
+ const o={saleId:uid('SALE'),date:f.get('date'),sellerId:seller.id,productId:p.id,productName:p.name,quantity:q,customerName:f.get('customerName'),customerMobile:f.get('customerMobile'),customerEmail:f.get('customerEmail'),customerAddress:f.get('customerAddress'),price:p.price,gst:p.gst,base,total,commission,tds,status:'COMPLETED',totalPayable:Math.max(0,commission-tds)};
+ await put('sales',o);await audit('SALE_CREATED',o.saleId,`${seller.name} / ${p.name}`);closeModal();toast('Sale saved. Commission calculated.');go('sales')
 }
-
 async function openTargetForm(){
  const aa=await all('members'),ms=scopeMembers(aa).filter(m=>m.status==='ACTIVE');document.getElementById('modalTitle').textContent='Set Monthly Target';
  document.getElementById('modalBody').innerHTML=`<form id="targetForm" class="form-grid"><div class="field"><label>Member</label><select name="memberId">${ms.map(m=>`<option value="${m.id}">${esc(m.name)} • ${esc(m.role)}</option>`).join('')}</select></div><div class="field"><label>Month</label><input name="month" type="month" value="${new Date().toISOString().slice(0,7)}"></div><div class="field"><label>Target Amount</label><input name="amount" type="number" min="0"></div><div class="field"><label>Target Units</label><input name="units" type="number" min="0"></div><div class="field full"><button class="btn green">Save Target</button></div></form>`;
@@ -1293,11 +1128,8 @@ async function openPayoutForm(){
  document.getElementById('modal').classList.add('show');document.getElementById('payoutForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),s=await get('sales',Number(f.get('saleId'))),aa2=await all('members'),m=aa2.find(x=>x.id===s.sellerId),p={payoutId:uid('PAY'),memberId:m.id,memberName:m.name,saleId:s.saleId,gross:s.commission,tds:s.tds,net:s.commission-s.tds,paymentDate:f.get('paymentDate'),mode:f.get('mode'),utr:f.get('utr'),notes:f.get('notes'),status:'PAID'};await put('payouts',p);s.payoutId=p.payoutId;await put('sales',s);await audit('PAYOUT_MARKED_PAID',p.payoutId,m.name);closeModal();toast('Payout marked paid');go('payouts')}
 }
 function authorisedSignatureForMember(m,aa){
-  const admin = aa.find(x =>
-    x.role === 'SUPER ADMIN' && String(x.signature||'').trim()
-  );
-
-  return admin?.signature || state.user?.signature || '';
+  const pm=rootPM(m,aa);
+  return pm?.name || pm?.full_name || '';
 }
 function idCardFrontHTML(m,aa){
   const sig=authorisedSignatureForMember(m,aa);
@@ -1318,7 +1150,7 @@ function idCardFrontHTML(m,aa){
     </div>
     <div class="id-sign">
       <small>AUTHORISED SIGNATURE</small>
-      ${sig?`<img src="${sig}" alt="Authorised Signature">`:''}
+      <span class="id-sign-name">${esc(sig||'')}</span>
     </div>
   </div></div>`;
 }
@@ -1352,36 +1184,30 @@ function idCardPairHTML(m,aa){
 async function renderSelectedIDCard(){
   const id=String(document.getElementById('idMemberSelect')?.value||'');
   if(!id)return;
-
   try{
     const {data,error}=await window.careerNestSupabase
       .from('members')
       .select('*, roles:role_id(code,name)')
       .eq('id',id)
       .maybeSingle();
-
     if(error)throw error;
-    if(!data)return;
+    if(!data)return toast('MEMBER NOT FOUND');
 
     const {data:allData,error:allError}=await window.careerNestSupabase
       .from('members')
       .select('*, roles:role_id(code,name)')
       .eq('status','ACTIVE')
       .order('created_at',{ascending:true});
-
     if(allError)throw allError;
 
-    const member=cloudLocal(data);
-    const allMembers=(allData||[]).map(cloudLocal);
-
-    document.getElementById('idPrint').innerHTML=
-      idCardPairHTML(member,allMembers);
-
+    const aa=(allData||[]).map(cloudLocal);
+    const m=cloudLocal(data);
+    document.getElementById('idPrint').innerHTML=idCardPairHTML(m,aa);
   }catch(e){
-    console.error('ID CARD LOAD FAILED',e);
     toast('ID CARD LOAD FAILED: '+(e.message||e));
   }
 }
+
 function printIDPair(){
   const oldTitle=document.title;
   document.title='CAREER NEST ID CARD';
